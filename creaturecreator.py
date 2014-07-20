@@ -1,15 +1,15 @@
 from mainloop import init, mainloop, StdMain
-from log import *
 from vector2 import Vec2d
 
 import manager
+import eventhandler
 
 import draw
 
 
 TITLE = 'CreatureCreator'
 FPS = 30
-WINDOWSIZE = (1200, 720)
+WINDOWSIZE = Vec2d(1200, 720)
 init(WINDOWSIZE, '--Loading--')
 
 
@@ -18,7 +18,14 @@ class CreatureCreator(StdMain):
 	def __init__(self):
 		self.mousePos = Vec2d(0, 0)
 		self.partManager = manager.PartManager()
-		self.creatureManager = manager.CreatureManager()
+		self.creatureManager = manager.CreatureManager(self.partManager)
+		avalible = self.creatureManager.getAvalibleCreatures()
+		for i in range(len(avalible)):
+			print(i, avalible)
+		n = 0#int(input('> '))
+		assert self.creatureManager.setActiveCreature(avalible[n]) == True, 'Not able to set Creature'
+		self.creatureManager.activeCreature.size = 25
+		self.eventHandler = eventhandler.EventHandler()
 
 	def onKey(self, ev):
 		pass
@@ -30,10 +37,11 @@ class CreatureCreator(StdMain):
 		pass
 
 	def draw(self):
-		pass
+		self.creatureManager.activeCreature.draw(WINDOWSIZE/2)
 
 	def onMouseMotion(self, ev):
 		self.mousePos = Vec2d(ev.pos[0], ev.pos[1])
+		self.eventHandler.mouseMovement(self.mousePos)
 
 	def onClick(self, ev):
 		pass

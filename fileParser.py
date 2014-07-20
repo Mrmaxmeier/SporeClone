@@ -4,10 +4,10 @@ import os
 import body
 
 
-def loadPart(filename, partManager):
+def loadPart(filename):
 	with open(filename, "r") as jsonfile:
 		data = json.loads(jsonfile.read())
-		partClass = parts.GenericPart().getClass(data, partManager)
+		partClass = parts.GenericPart().getClass(data)
 		return partClass
 
 
@@ -30,12 +30,21 @@ def saveGame(filename, gameObj):
 	raise NotImplementedError
 
 
-def loadAllParts(partManager):
-	parts = []
+def loadAllParts():
+	parts = {}
 	for f in os.listdir("data/parts"):
 		if f.endswith(".json"):
-			p = loadPart("data/parts/"+f, partManager)
-			parts.append(p)
-	return p
+			print('Loading Part', f)
+			p = loadPart("data/parts/"+f)
+			parts[p.name] = p
+	return parts
 
-print(loadCreature('data/creatures/bareMinimum.json'))
+
+def loadAllCreatures(partManager):
+	creatures = {}
+	for f in os.listdir("data/creatures"):
+		if f.endswith(".json"):
+			print('Loading Creature', f)
+			c = loadCreature("data/creatures/"+f, partManager)
+			creatures[c.name] = c
+	return creatures

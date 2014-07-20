@@ -2,12 +2,16 @@ import parts
 from vector2 import Vec2d
 
 
-def generatePartSubTree(struct, partManager):
-	part = partManager.getPart(struct['name'])
-	part.sizeMod(struct['sizeMod'])
-	for i in xrange(len(part.getHinges())):
-		if i in struct['attatched']:
-			p = generatePartSubTree(struct['attatched'][i], partManager)
+def generatePartSubTree(struct, partManager, parent):
+	partClass = partManager.getPart(struct['name'])
+	if not partClass:
+		raise RuntimeError('Part "'+str(struct['name'])+'" is not avalible!')
+	part = partClass(parent)
+	size = int(struct['sizeMod'])
+	part.setSize(size)
+	for i in range(len(part.getHinges())):
+		if str(i) in struct['attatched']:
+			p = generatePartSubTree(struct['attatched'][str(i)], partManager, part.getHinges()[i])
 			part.getHinges()[i].setPart(p)
 	return part
 
@@ -19,7 +23,8 @@ def generateBodyHinge(struct, partManager):
 	#          },
 	#     'name': 'base'}
 	h = parts.Hinge(Vec2d(0, 0))
-	h.setPart(generatePartSubTree(struct, partManager))
+	mainPart = generatePartSubTree(struct, partManager, h)
+	h.setPart(mainPart)
 	return h
 
 
@@ -39,11 +44,13 @@ class GenericBody(object):
 
 	def getClass(self, d, partManager):
 		classDict = {}
-		classDerv = (GeneratedBody)
+		classDerv = (GeneratedBody,)
 		if 'name' in d:
 			className = d['name']
+			classDict['name'] = d['name']
 		else:
-			className = 'UnnamedPart | FIXME'
+			className = 'UnnamedGeneratedBody | FIXME'
+			classDict['name'] = 'UnnamedGeneratedBody | FIXME'
 		if 'stats' in d:
 			classDict['stats'] = d['stats']
 		else:
@@ -52,7 +59,11 @@ class GenericBody(object):
 			classDict['baseHinge'] = generateBodyHinge(d['structure'], partManager)
 		else:
 			raise NotImplementedError
+		classDict['size'] = 1
 		return type(className, classDerv, classDict)
+
+	def draw(self, pos):
+		self.baseHinge.getPart().drawSubParts(pos, self.size, drawHinges=True)
 
 
 class GeneratedBody(GenericBody):

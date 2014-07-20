@@ -1,13 +1,12 @@
 import draw
 from vector2 import Vec2d
-from log import *
 
 
 class Hinge(object):
 
 	def __init__(self, position, parent=None):
 		self.parent = parent
-		self.position = position
+		self.position = Vec2d(position)
 		self.part = None
 		self.color = draw.blue
 		self.size = 0.2
@@ -21,7 +20,6 @@ class Hinge(object):
 	def collides(self, ownpos, collpos, size):
 		distancesqrt = ownpos.get_dist_sqrd(collpos)
 		radius = self.size*size
-		log(distancesqrt, radius**2, ownpos, collpos, level='MATH')
 		return distancesqrt < (radius ** 2)
 
 	def hasPart(self):
@@ -37,8 +35,7 @@ class Hinge(object):
 		self.position = position
 
 	def draw(self, position, size):
-		draw2d.circle(self.color, position, self.size * size)
-		log('Drawn', self.name, '@', position, 'sized', self.size * size, level='DRAW')
+		draw.circle(position, self.size * size, draw.blue)
 
 
 # ## ## ## ## ## ## ## ## ## ## ## ## ## #
@@ -55,13 +52,9 @@ class Part(object):
 		self.size = 1
 		self.sizeRange = [0.5, 2]
 		self.rotation = 0
-		self.name = 'UnnamedPart:'+str(type(self))
-		self.subParts = []
-		self.color = draw2d.green
 
 	def draw(self, position, size):
-		draw2d.circle(self.color, position, self.size*size)
-		log('Drawn', self.name, '@', position, 'sized', self.size * size, level='DRAW')
+		draw.point(draw.blue, position, self.size*size)
 
 	def drawSubParts(self, position, size, drawHinges=False):
 		self.draw(position, size)
@@ -102,9 +95,6 @@ class Part(object):
 		#log(self.name, position, partsList, level='MATH')
 		return partsList
 
-	def drawHinges(self, position, size):
-		raise NotImplementedError
-
 	def getHinges(self):
 		return []
 
@@ -119,13 +109,23 @@ class Part(object):
 	def modSize(self, modifier):
 		self.size *= modifier
 		if self.sizeRange[0] <= self.size <= self.sizeRange[1]:
-			self.update()
+			self.update(0.0)
 		else:
 			if self.size > self.sizeRange[1]:
 				self.size = self.sizeRange[1]
 			else:
 				self.size = self.sizeRange[0]
 		#self.update()
+
+	def setSize(self, size):
+		self.size = size
+		if self.sizeRange[0] <= self.size <= self.sizeRange[1]:
+			self.update(0.0)
+		else:
+			if self.size > self.sizeRange[1]:
+				self.size = self.sizeRange[1]
+			else:
+				self.size = self.sizeRange[0]
 
 	def getHandles(self):
 		return {}
@@ -160,7 +160,7 @@ class Part(object):
 
 class GenericPart(Part):
 
-	def __init__(self, d):
+	def __init__(self):
 		#{
 		# 'attatchmentPoints': [[10, 0], [7, 7], [0, 10], [7, -7], [0, -10], [-7, -7], [-10, 0], [-7, 7]],
 		# 'partClass': 'BodyBase',
@@ -186,52 +186,57 @@ class GenericPart(Part):
 				raise NotImplementedError
 			draw.point(pos, color, size)
 
-	def getClass(d):
+	def getClass(self, d):
 		classDict = {}
-		classDerv = (GeneratedPart)
+		if 'partClass' in d:
+			classDerv = (CLASSNAME2CLASS[d['partClass']],)
+		else:
+			classDerv = (GeneratedPart,)
 		if 'name' in d:
 			className = d['name']
+			classDict['name'] = d['name']
 		else:
-			className = 'UnnamedPart | FIXME'
+			className = 'UnnamedGeneratedPart | FIXME'
+			classDict['name'] = 'UnnamedGeneratedPart | FIXME'
 		if 'stats' in d:
 			classDict['stats'] = d['stats']
 		else:
 			self.stats = {}
 		if 'structure' in d:
-			classDict['structure'] = d['structure']
+			struct = d['structure']
+			struct.sort(key=lambda s: s['layer'] if 'layer' in s else 0)
+			classDict['structure'] = struct
 			#structure = [{'size': 10, 'position': [0, 0], 'name': 'point'},]
 		else:
 			raise NotImplementedError
-		if 'attatchmentPoints' in d:
-			classDict['hinges'] = [Hinge(position, self) for position in d['attatchmentPoints']]
-		else:
-			classDict['hinges'] = []
+		classDict['classDict'] = d
 		return type(className, classDerv, classDict)
 
 
 class GeneratedPart(GenericPart):
-	pass
-
-
-class BodyBase(GenericPart):
-
-	def onCollision(self):
-		raise NotImplementedError
-
-	def getHandles(self):
-		return {'collision': self.onCollision}
-
-
-class Mouth(GenericPart):
-
 	def __init__(self, hinge):
-		Part.__init__(self, hinge)
-		self.name = 'Mouth'
-		self.size = 0.2
-		self.sizeRange = [0.1, 0.5]
-		self.stat_MouthNum = 1
-		self.stat_Mass = 1
-		self.color = draw2d.blue
+
+		self.hinge = hinge
+		self.size = 1
+		self.sizeRange = [0.5, 2]
+		self.rotation = 0
+		self.hinges = []
+		if 'attatchmentPoints' in self.classDict:
+			for position in self.classDict['attatchmentPoints']:
+				self.hinges.append(Hinge(position, self))
+
+	def getHinges(self):
+		return self.hinges
+
+	def draw(self, position, size):
+		for d in self.structure:
+			if d['draw'] == 'point':
+				pos = Vec2d(d['position'])*size + position
+				color = d['color']
+				draw.point(pos, color, size * d['size'], alpha=255.0)
+
+
+class BodyBase(GeneratedPart):
 
 	def onCollision(self):
 		raise NotImplementedError
@@ -239,4 +244,47 @@ class Mouth(GenericPart):
 	def getHandles(self):
 		return {'collision': self.onCollision}
 
-CLASSNAME2CLASS = {'BodyBase': BodyBase, 'GenericPart': GenericPart, 'Mouth': Mouth}
+
+class Mouth(GeneratedPart):
+
+	def onCollision(self):
+		raise NotImplementedError
+
+	def getHandles(self):
+		return {'collision': self.onCollision}
+
+
+class Eye(GeneratedPart):
+	def __init__(self, hinge):
+		GeneratedPart.__init__(self, hinge)
+		self.mousePos = False
+
+	def draw(self, position, size):
+		for d in self.structure:
+			if d['draw'] == 'point':
+				pos = Vec2d(d['position'])*size + position
+				if 'name' in d:
+					if d['name'] == 'pupil':
+						v = pos-self.mousePos
+						if v.get_length() > 5:
+							v = v.normalized() * 5
+						pos += v
+				color = d['color']
+				draw.point(pos, color, size * d['size'], alpha=255.0)
+
+	def onMouse(self, position):
+		self.mousePos = position
+
+	def getHandles(self):
+		return {'mouseMovement': self.onMouse}
+
+class Paddle(GeneratedPart):
+
+	def onBodyMovement(self, mv):
+		raise NotImplementedError
+
+	def getHandles(self):
+		return {'bodyMovement': self.onBodyMovement}
+
+
+CLASSNAME2CLASS = {'BodyBase': BodyBase, 'Mouth': Mouth, 'Eye':Eye, 'Paddle':Paddle}

@@ -5,16 +5,26 @@ import os
 
 class PartManager:
 	def __init__(self):
-		self.parts = fileParser.loadAllParts()
+		self.refreshParts()
 
 	def getPart(self, name):
-		pass
+		if name in self.parts:
+			return self.parts[name]
+		return None
+
+	def refreshParts(self):
+		self.parts = fileParser.loadAllParts()
+
+	def getAvalibleParts(self):
+		return self.parts.keys()
 
 
 class CreatureManager:
-	def __init__(self):
+	def __init__(self, partManager):
+		self.partManager = partManager
 		self.creatures = {}
 		self.activeCreature = None
+		self.avalibleCreatures = fileParser.loadAllCreatures(self.partManager)
 
 	def addCreature(self):
 		raise NotImplementedError
@@ -25,9 +35,12 @@ class CreatureManager:
 		else:
 			return None
 
+	def getAvalibleCreatures(self):
+		return list(self.avalibleCreatures.keys())
+
 	def setActiveCreature(self, name):
-		if name in self.creatures:
-			self.activeCreature = self.creatures[name]
+		if name in self.avalibleCreatures:
+			self.activeCreature = self.avalibleCreatures[name]()
 			return True
 		else:
 			return False
