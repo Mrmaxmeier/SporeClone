@@ -6,9 +6,6 @@ from vector2 import *
 import draw
 import random
 
-from threading import Thread
-import queue
-
 class Particle:
 	def __init__(self, particlespace, pos=Vec2d(0, 0), vel=Vec2d(0, 0), lifetime=10):
 		self.particlespace = particlespace
@@ -179,11 +176,6 @@ class ParticleSpace:
 		self.size = size
 		self.particles = []
 		self.drawVelocity = False
-		self.cores = 8
-		self.threadQueue = queue.Queue()
-		self.threads = [Thread(target=self.threadWorker, args=(i,)) for i in range(self.cores)]
-		for t in self.threads:
-			t.start()
 
 	def destroyParticle(self, particle):
 		self.particles.remove(particle)
@@ -194,13 +186,15 @@ class ParticleSpace:
 		return particle
 
 	def update(self, dt):
-		if len(self.particles) > 10:
-			for particle in self.particles:
-				self.threadQueue.put((particle, dt))
-			self.threadQueue.join()
-		else:
-			for particle in self.particles:
-				particle.update(dt)
+		#if len(self.particles) > 10:
+		#	for particle in self.particles:
+		#		self.threadQueue.put((particle, dt))
+		#	self.threadQueue.join()
+		#else:
+		#	for particle in self.particles:
+		#		particle.update(dt)
+		for particle in self.particles:
+			particle.update(dt)
 
 	def threadWorker(self, threadNumber):
 		while 1:

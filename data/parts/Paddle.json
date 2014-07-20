@@ -1,0 +1,29 @@
+{  
+   "name":"Paddle",
+   "partClass":"Paddle",
+   "structure":[  
+      {  
+         "name":"main",
+         "draw":"point",
+         "size":10,
+         "color":[  
+            0.3,
+            0.3,
+            0.3
+         ],
+         "position":[  
+            0,
+            0
+         ]
+      }
+   ],
+   "attatchmentPoints":[  
+
+   ],
+   "stats":{  
+      "mass":0.1,
+      "energyCost":0.5,
+      "speed":1,
+      "agility":1
+   }
+}

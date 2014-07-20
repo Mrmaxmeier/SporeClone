@@ -1,0 +1,65 @@
+{  
+   "name":"eyesEverywhere",
+   "structure":{  
+      "name":"BasePart",
+      "sizeMod":1,
+      "attatched":{  
+         "0":{  
+            "name":"Eye",
+            "sizeMod":1,
+            "attatched":{  
+
+            }
+         },
+         "1":{  
+            "name":"Eye",
+            "sizeMod":1,
+            "attatched":{  
+
+            }
+         },
+         "2":{  
+            "name":"Eye",
+            "sizeMod":1,
+            "attatched":{  
+
+            }
+         },
+         "3":{  
+            "name":"Eye",
+            "sizeMod":1,
+            "attatched":{  
+
+            }
+         },
+         "4":{  
+            "name":"Eye",
+            "sizeMod":1,
+            "attatched":{  
+
+            }
+         },
+         "5":{  
+            "name":"Eye",
+            "sizeMod":1,
+            "attatched":{  
+
+            }
+         },
+         "6":{  
+            "name":"Eye",
+            "sizeMod":1,
+            "attatched":{  
+
+            }
+         },
+         "7":{  
+            "name":"Eye",
+            "sizeMod":1,
+            "attatched":{  
+
+            }
+         }
+      }
+   }
+}

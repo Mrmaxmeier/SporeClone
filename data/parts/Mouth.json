@@ -1,0 +1,28 @@
+{  
+   "name":"Mouth",
+   "partClass":"Mouth",
+   "structure":[  
+      {  
+         "name":"main",
+         "draw":"point",
+         "size":10,
+         "color":[  
+            0.7,
+            0.4,
+            0.3
+         ],
+         "position":[  
+            0,
+            0
+         ]
+      }
+   ],
+   "attatchmentPoints":[  
+
+   ],
+   "stats":{  
+      "mass":0.2,
+      "energyCost":0.5,
+      "mouth":1
+   }
+}

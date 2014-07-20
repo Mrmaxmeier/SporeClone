@@ -265,9 +265,19 @@ class Eye(GeneratedPart):
 				pos = Vec2d(d['position'])*size + position
 				if 'name' in d:
 					if d['name'] == 'pupil':
-						v = pos-self.mousePos
-						if v.get_length() > 5:
-							v = v.normalized() * 5
+						v = self.mousePos-pos
+						if v.get_length() > 10:
+							v = v.normalized() * 10
+						pos += v
+					elif d['name'] == 'iris':
+						v = self.mousePos-pos
+						if v.get_length() > 20:
+							v = v.normalized() * 20
+						pos += v
+					elif d['name'] == 'subiris':
+						v = self.mousePos-pos
+						if v.get_length() > 30:
+							v = v.normalized() * 30
 						pos += v
 				color = d['color']
 				draw.point(pos, color, size * d['size'], alpha=255.0)

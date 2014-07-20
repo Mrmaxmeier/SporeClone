@@ -1,0 +1,38 @@
+{  
+   "name":"Mouthotronix",
+   "structure":{  
+      "name":"BasePart",
+      "sizeMod":1,
+      "attatched":{  
+         "0":{  
+            "name":"Mouth",
+            "sizeMod":1,
+            "attatched":{  
+
+            }
+         },
+
+         "1":{  
+            "name":"Eye",
+            "sizeMod":1,
+            "attatched":{  
+
+            }
+         },
+         "4":{  
+            "name":"Paddle",
+            "sizeMod":1,
+            "attatched":{  
+
+            }
+         },
+         "7":{  
+            "name":"Eye",
+            "sizeMod":1,
+            "attatched":{  
+
+            }
+         }
+      }
+   }
+}
