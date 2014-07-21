@@ -5,21 +5,24 @@ import body
 
 
 def loadPart(filename):
-	with open(filename, "r") as jsonfile:
+	with open("data/parts/"+filename, "r") as jsonfile:
 		data = json.loads(jsonfile.read())
 		partClass = parts.GenericPart().getClass(data)
 		return partClass
 
 
 def loadCreature(filename, partManager):
-	with open(filename, "r") as jsonfile:
+	with open("data/creatures/"+filename, "r") as jsonfile:
 		data = json.loads(jsonfile.read())
 		bodyClass = body.GenericBody().getClass(data, partManager)
 		return bodyClass
 
 
-def saveCreature(filename, creatureObj):
-	raise NotImplementedError
+def saveCreature(filename, creatureObj, creatureName=False):
+	json = creatureObj.getJson(creatureName)
+	with open("data/creatures/"+filename, "w") as jsonfile:
+		jsonfile.write(json)
+	print('Wrote ', "data/creatures/"+filename)
 
 
 def loadGame(filename):
@@ -35,7 +38,7 @@ def loadAllParts():
 	for f in sorted(os.listdir("data/parts")):
 		if f.endswith(".json"):
 			print('Loading Part', f)
-			p = loadPart("data/parts/"+f)
+			p = loadPart(f)
 			parts[p.name] = p
 	return parts
 
@@ -45,6 +48,6 @@ def loadAllCreatures(partManager):
 	for f in sorted(os.listdir("data/creatures")):
 		if f.endswith(".json"):
 			print('Loading Creature', f)
-			c = loadCreature("data/creatures/"+f, partManager)
+			c = loadCreature(f, partManager)
 			creatures[c.name] = c
 	return creatures

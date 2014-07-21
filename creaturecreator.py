@@ -5,10 +5,12 @@ import manager
 import eventhandler
 
 import draw
+import font
+import pygame
 
 
 TITLE = 'CreatureCreator'
-FPS = 30
+FPS = 60
 WINDOWSIZE = Vec2d(1920, 1080) * 0.8
 WINDOWSIZE = Vec2d(int(WINDOWSIZE[0]), int(WINDOWSIZE[1]))
 init(WINDOWSIZE, '--Loading--')
@@ -24,6 +26,12 @@ class CreatureCreator(StdMain):
 		assert self.creatureCount > 0, 'No Creatures(.json) in Data/Creatures'
 		self.setActiveCreature(0)
 		self.currentCreatureIndex = 0
+		#
+		#
+		#
+		#
+		self.myfont = pygame.font.SysFont("Courier New", 32, bold=True)
+		self.fps_display = font.RenderText("", [0, 0, 0], self.myfont)
 
 	def setActiveCreature(self, num):
 		assert self.creatureManager.setActiveCreature(self.creatureManager.getAvalibleCreatures()[num]) == True, 'Not able to set Creature'
@@ -41,19 +49,24 @@ class CreatureCreator(StdMain):
 			print()
 			print('Resetting...')
 			self.__init__()
-		if ev.unicode == '\t':
+		elif ev.unicode == '\t':
 			self.currentCreatureIndex = (self.currentCreatureIndex + 1) % self.creatureCount
 			self.setActiveCreature(self.currentCreatureIndex)
 			print('Swapped Creature to', self.creatureManager.activeCreature.name)
+		elif ev.unicode == 's':
+			print()
+			self.creatureManager.saveActiveCreature('savedCreature.json')
 
 	def update(self, dt):
 		self.eventHandler.update(dt)
+		self.fps_display.change_text(str(int(self.clock.get_fps())) + " fps")
 
 	def onActiveEvent(self, ev):
 		pass
 
 	def draw(self):
 		self.creatureManager.activeCreature.draw(WINDOWSIZE/2)
+		self.fps_display.draw([10, 10])
 
 	def onMouseMotion(self, ev):
 		self.mousePos = Vec2d(ev.pos[0], ev.pos[1])

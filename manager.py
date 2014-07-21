@@ -45,6 +45,13 @@ class CreatureManager:
 		else:
 			return False
 
+	def saveActiveCreature(self, fileName):
+		if self.activeCreature:
+			fileParser.saveCreature(fileName, self.activeCreature, fileName)
+			return True
+		else:
+			return False
+
 
 class GameManager:
 	def __init__(self):

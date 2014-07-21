@@ -54,8 +54,9 @@ def init(size, title):
 def mainloop(options, Class, color=(0, 0, 0)):
 	(size, title, fps) = options
 	init(size, title)
-	obj = Class()
 	clock = pygame.time.Clock()
+	obj = Class()
+	obj.clock = clock
 	while 1:
 		glClearColor(color[0], color[1], color[2], 1.0)
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)

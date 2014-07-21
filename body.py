@@ -1,5 +1,6 @@
 import parts
 from vector2 import Vec2d
+import json
 
 
 def generatePartSubTree(struct, partManager, parent):
@@ -9,6 +10,7 @@ def generatePartSubTree(struct, partManager, parent):
 	part = partClass(parent)
 	size = float(struct['sizeMod'])
 	part.setSize(size)
+	part.origSize = size
 	for i in range(len(part.getHinges())):
 		if str(i) in struct['attatched']:
 			p = generatePartSubTree(struct['attatched'][str(i)], partManager, part.getHinges()[i])
@@ -26,6 +28,22 @@ def generateBodyHinge(struct, partManager):
 	mainPart = generatePartSubTree(struct, partManager, h)
 	h.setPart(mainPart)
 	return h
+
+
+def generateSubStructure(part):
+	d = {'name': part.name, 'sizeMod': part.origSize, 'attatched': {}}
+	hinges = part.getHinges()
+	for i in range(len(hinges)):
+		h = hinges[i]
+		if h.hasPart():
+			p = h.getPart()
+			d['attatched'][i] = generateSubStructure(p)
+	return d
+
+
+def generateStructureDict(body):
+	d = generateSubStructure(body.baseHinge.getPart())
+	return d
 
 
 class GenericBody(object):
@@ -51,15 +69,12 @@ class GenericBody(object):
 		else:
 			className = 'UnnamedGeneratedBody | FIXME'
 			classDict['name'] = 'UnnamedGeneratedBody | FIXME'
-		if 'stats' in d:
-			classDict['stats'] = d['stats']
-		else:
-			self.stats = {}
 		if 'structure' in d:
 			classDict['baseHinge'] = generateBodyHinge(d['structure'], partManager)
 		else:
 			raise NotImplementedError
 		classDict['size'] = 1
+		classDict['classDict'] = d
 		return type(className, classDerv, classDict)
 
 	def draw(self, pos):
@@ -67,4 +82,12 @@ class GenericBody(object):
 
 
 class GeneratedBody(GenericBody):
-	pass
+	def getJson(self, name=False):
+		d = self.classDict
+		#{}
+		if name:
+			d['name'] = name
+		else:
+			d['name'] = self.name
+		d['structure'] = generateStructureDict(self)
+		return json.dumps(d)

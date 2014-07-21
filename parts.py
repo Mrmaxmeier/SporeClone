@@ -201,6 +201,7 @@ class GeneratedPart(GenericPart):
 
 		self.hinge = hinge
 		self.size = 1
+		self.origSize = self.size
 		self.sizeRange = [0.5, 2]
 		self.rotation = 0
 		self.hinges = []

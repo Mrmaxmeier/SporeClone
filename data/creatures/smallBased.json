@@ -4,7 +4,7 @@
       "name":"BaseSmall",
       "sizeMod":1,
       "attatched":{  
-         "0":{  
+         "2":{  
             "name":"Eye",
             "sizeMod":1,
             "attatched":{  
@@ -18,7 +18,7 @@
 
             }
          },
-         "2":{  
+         "0":{  
             "name":"Paddle",
             "sizeMod":1,
             "attatched":{  
