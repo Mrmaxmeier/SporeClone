@@ -1,5 +1,4 @@
 from mainloop import init, mainloop, StdMain
-from log import *
 from vector2 import Vec2d
 
 import draw
