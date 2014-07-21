@@ -3,7 +3,10 @@ class EventHandler(object):
 		self.handlers = {'bodyMovement':[], 'mouseMovement':[], 'collision':[]}
 
 	def update(self, dt):
-		pass
+		self.callHandlers('update', dt)
+
+	def frame(self):
+		self.callHandlers('frame')
 
 	def mouseMovement(self, position):
 		self.callHandlers('mouseMovement', position)

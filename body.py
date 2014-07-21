@@ -7,7 +7,7 @@ def generatePartSubTree(struct, partManager, parent):
 	if not partClass:
 		raise RuntimeError('Part "'+str(struct['name'])+'" is not avalible!')
 	part = partClass(parent)
-	size = int(struct['sizeMod'])
+	size = float(struct['sizeMod'])
 	part.setSize(size)
 	for i in range(len(part.getHinges())):
 		if str(i) in struct['attatched']:

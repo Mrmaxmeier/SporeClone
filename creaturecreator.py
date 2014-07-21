@@ -20,12 +20,15 @@ class CreatureCreator(StdMain):
 		self.mousePos = Vec2d(0, 0)
 		self.partManager = manager.PartManager()
 		self.creatureManager = manager.CreatureManager(self.partManager)
-		avalible = self.creatureManager.getAvalibleCreatures()
-		for i in range(len(avalible)):
-			print('['+str(i)+']', avalible[i])
-		n = int(input('> '))
-		assert self.creatureManager.setActiveCreature(avalible[n]) == True, 'Not able to set Creature'
-		self.creatureManager.activeCreature.size = 25
+		self.creatureCount = len(self.creatureManager.getAvalibleCreatures())
+		assert self.creatureCount > 0, 'No Creatures(.json) in Data/Creatures'
+		self.setActiveCreature(0)
+		self.currentCreatureIndex = 0
+
+	def setActiveCreature(self, num):
+		assert self.creatureManager.setActiveCreature(self.creatureManager.getAvalibleCreatures()[num]) == True, 'Not able to set Creature'
+		#print(self.creatureManager.activeCreature.size)
+		self.creatureManager.activeCreature.size *= 20
 		self.eventHandler = eventhandler.EventHandler()
 		subp = self.creatureManager.activeCreature.baseHinge.getPart().getAllSubParts(WINDOWSIZE/2, 1)
 		for p, pos in subp:
@@ -38,9 +41,13 @@ class CreatureCreator(StdMain):
 			print()
 			print('Resetting...')
 			self.__init__()
+		if ev.unicode == '\t':
+			self.currentCreatureIndex = (self.currentCreatureIndex + 1) % self.creatureCount
+			self.setActiveCreature(self.currentCreatureIndex)
+			print('Swapped Creature to', self.creatureManager.activeCreature.name)
 
 	def update(self, dt):
-		pass
+		self.eventHandler.update(dt)
 
 	def onActiveEvent(self, ev):
 		pass

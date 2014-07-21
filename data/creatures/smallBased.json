@@ -1,25 +1,24 @@
 {  
-   "name":"Mouthotronix",
+   "name":"Paddlotronix",
    "structure":{  
-      "name":"Base",
+      "name":"BaseSmall",
       "sizeMod":1,
       "attatched":{  
-         "4":{  
-            "name":"Mouth",
-            "sizeMod":0.9,
-            "attatched":{  
-
-            }
-         },
-
-         "5":{  
+         "0":{  
             "name":"Eye",
             "sizeMod":1,
             "attatched":{  
 
             }
          },
-         "0":{  
+         "1":{  
+            "name":"Paddle",
+            "sizeMod":0.8,
+            "attatched":{  
+
+            }
+         },
+         "2":{  
             "name":"Paddle",
             "sizeMod":1,
             "attatched":{  
@@ -27,8 +26,8 @@
             }
          },
          "3":{  
-            "name":"Eye",
-            "sizeMod":1,
+            "name":"Paddle",
+            "sizeMod":0.8,
             "attatched":{  
 
             }

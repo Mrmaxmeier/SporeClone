@@ -1,0 +1,9 @@
+{  
+   "name":"Test",
+   "structure":{  
+      "name":"Base",
+      "sizeMod":1,
+      "attatched":{  
+      }
+   }
+}

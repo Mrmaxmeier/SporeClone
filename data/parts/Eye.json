@@ -5,7 +5,7 @@
       {  
          "name":"main",
          "draw":"point",
-         "size":10,
+         "size":5,
          "layer":0,
          "color":[  
             0,
@@ -20,7 +20,7 @@
       {  
          "name":"pupil",
          "draw":"point",
-         "size":5,
+         "size":4,
          "layer":1,
          "color":[  
             0.5,
@@ -63,39 +63,7 @@
          ]
       }
    ],
-   "attatchmentPoints":[  
-      [  
-         10,
-         0
-      ],
-      [  
-         7,
-         7
-      ],
-      [  
-         0,
-         10
-      ],
-      [  
-         7,
-         -7
-      ],
-      [  
-         0,
-         -10
-      ],
-      [  
-         -7,
-         -7
-      ],
-      [  
-         -10,
-         0
-      ],
-      [  
-         -7,
-         7
-      ]
+   "attatchmentPoints":[
    ],
    "stats":{  
       "mass":2,

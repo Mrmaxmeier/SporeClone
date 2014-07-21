@@ -16,8 +16,11 @@
 # You should have received a copy of the GNU General Public License
 # along with PyGL2D.  If not, see <http://www.gnu.org/licenses/>.
 #===============================================================================
+
+
+#===============================================================================
 #
-# Python3 Pygame 1.9.1 Port
+# Python3 P0rt
 #
 #===============================================================================
 #
@@ -157,7 +160,7 @@ def polygon(points, color, aa=True, alpha=255.0, stipple_pattern=None):
 
 def rect(rectstyle, color, width=0, alpha=255.0, stipple_factor=0, stipple_pattern=None):
 	x, y, w, h = rectstyle
-	points = [[x, y], [x + w, y], [x + w, y + h], [x, y + h]]
+	points = ([x, y], [x + w, y], [x + w, y + h], [x, y + h])
 	points = flip_points(points)
 	if not width:
 		polygon(points, color, aa=False, alpha=alpha, stipple_pattern=stipple_pattern)

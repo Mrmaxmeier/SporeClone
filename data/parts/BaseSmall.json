@@ -1,0 +1,31 @@
+{  
+   "name":"BaseSmall",
+   "partClass":"Base",
+   "structure":[  
+      {  
+         "name":"basePoint|thereisnopointinthisname.",
+         "draw":"point",
+         "size":5,
+         "color":[  
+            0.7,
+            0.4,
+            0.3
+         ],
+         "position":[  
+            0,
+            0
+         ]
+      }
+   ],
+   "attatchmentPoints":[  
+   {"x":0.0, "y":6.0, "rot":0, "num":0}, 
+   {"x":0.0, "y":6.0, "rot":90, "num":1}, 
+   {"x":0.0, "y":6.0, "rot":180, "num":2}, 
+   {"x":0.0, "y":6.0, "rot":270, "num":3}
+   ],
+   "stats":{  
+      "mass":2,
+      "health":10,
+      "energy":2
+   }
+}

@@ -32,7 +32,7 @@ def saveGame(filename, gameObj):
 
 def loadAllParts():
 	parts = {}
-	for f in os.listdir("data/parts"):
+	for f in sorted(os.listdir("data/parts")):
 		if f.endswith(".json"):
 			print('Loading Part', f)
 			p = loadPart("data/parts/"+f)
@@ -42,7 +42,7 @@ def loadAllParts():
 
 def loadAllCreatures(partManager):
 	creatures = {}
-	for f in os.listdir("data/creatures"):
+	for f in sorted(os.listdir("data/creatures")):
 		if f.endswith(".json"):
 			print('Loading Creature', f)
 			c = loadCreature("data/creatures/"+f, partManager)

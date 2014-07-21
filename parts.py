@@ -1,17 +1,18 @@
 import draw
 from vector2 import Vec2d
+import math
 
 
 class Hinge(object):
 
-	def __init__(self, position, parent=None):
+	def __init__(self, position, parent=None, rotation=0):
 		self.parent = parent
 		self.position = Vec2d(position)
+		self.origPosition = Vec2d(position)
 		self.part = None
 		self.color = draw.blue
 		self.size = 0.2
-		# self.hingeType = 0
-		# {0:'ALL_THINGS', 1:'SMALL_SHIT_ONLY', 2:'...'}
+		self.rotation = rotation
 		if parent:
 			self.name = 'Hinge on '+self.parent.name
 		else:
@@ -35,7 +36,7 @@ class Hinge(object):
 		self.position = position
 
 	def draw(self, position, size):
-		draw.circle(position, self.size * size, draw.blue)
+		draw.point(position, draw.blue, self.size * size * 3)
 
 
 # ## ## ## ## ## ## ## ## ## ## ## ## ## #
@@ -46,12 +47,11 @@ class Hinge(object):
 
 
 class Part(object):
-
 	def __init__(self, hinge):
 		self.hinge = hinge
 		self.size = 1
 		self.sizeRange = [0.5, 2]
-		self.rotation = 0
+		#self.rotation = 0
 
 	def draw(self, position, size):
 		draw.point(draw.blue, position, self.size*size)
@@ -61,13 +61,13 @@ class Part(object):
 		for hinge in self.getHinges():
 			if hinge.hasPart():
 				relpos = hinge.position * size
-				relpos.rotate(self.rotation)
+				relpos.rotate(hinge.rotation)
 				newpos = relpos + position
 				hinge.getPart().drawSubParts(newpos, hinge.getPart().size*size, drawHinges)
 			else:
 				if drawHinges:
 					relpos = hinge.position * size
-					relpos.rotate(self.rotation)
+					relpos.rotate(hinge.rotation)
 					newpos = relpos + position
 					hinge.draw(newpos, size)
 
@@ -78,7 +78,7 @@ class Part(object):
 		for hinge in self.getHinges():
 			if hinge.hasPart():
 				relpos = hinge.position * size
-				relpos.rotate(self.rotation)
+				relpos.rotate(hinge.rotation)
 				newpos = relpos + position
 				if getHinges and not onlyGetEmptyHinges:
 					partsList.append((hinge, newpos))
@@ -89,7 +89,7 @@ class Part(object):
 			else:
 				if getHinges:
 					relpos = hinge.position * size
-					relpos.rotate(self.rotation)
+					relpos.rotate(hinge.rotation)
 					newpos = relpos + position
 					partsList.append((hinge, newpos))
 		#log(self.name, position, partsList, level='MATH')
@@ -159,7 +159,6 @@ class Part(object):
 
 
 class GenericPart(Part):
-
 	def __init__(self):
 		#{
 		# 'attatchmentPoints': [[10, 0], [7, 7], [0, 10], [7, -7], [0, -10], [-7, -7], [-10, 0], [-7, 7]],
@@ -169,22 +168,6 @@ class GenericPart(Part):
 		# 'structure': [{'size': 10, 'position': [0, 0], 'name': 'point'}]
 		#}
 		pass
-
-	def draw(self):
-		for s in self.structure:
-			if 'size' in s:
-				size = s['size']
-			else:
-				size = 1
-			if 'color' in s:
-				color = s['color']
-			else:
-				color = draw.black
-			if 'position' in s:
-				pos = s['position']
-			else:
-				raise NotImplementedError
-			draw.point(pos, color, size)
 
 	def getClass(self, d):
 		classDict = {}
@@ -222,31 +205,74 @@ class GeneratedPart(GenericPart):
 		self.rotation = 0
 		self.hinges = []
 		if 'attatchmentPoints' in self.classDict:
-			for position in self.classDict['attatchmentPoints']:
-				self.hinges.append(Hinge(position, self))
+			for d in self.classDict['attatchmentPoints']:
+				self.hinges.append(Hinge(Vec2d(d['x'], d['y']), self, rotation=d['rot']))
 
 	def getHinges(self):
 		return self.hinges
 
 	def draw(self, position, size):
+		size *= self.size
 		for d in self.structure:
 			if d['draw'] == 'point':
-				pos = Vec2d(d['position'])*size + position
+				pos = Vec2d(d['position'])*size
+				if self.hinge:
+					pos.rotate(self.hinge.rotation)
+				pos += position
 				color = d['color']
 				draw.point(pos, color, size * d['size'], alpha=255.0)
+			elif d['draw'] == 'rect':
+				p1, p3 = d['positions']
+				p1 = Vec2d(p1)*size
+				p3 = Vec2d(p3)*size
+				if self.hinge:
+					p1.rotate(self.hinge.rotation)
+					p3.rotate(self.hinge.rotation)
+				p1 += position
+				p3 += position
+				color = d['color']
+				p2 = Vec2d(p1.x, p3.y)
+				p4 = Vec2d(p3.x, p1.y)
+				draw.polygon((p1, p2, p3, p4), color)
+				#draw.points2((p1, p2, p3, p4), color, size=10.0, alpha=255.0)
+			elif d['draw'] == 'ngon':
+				pos = Vec2d(d['position'])*size
+				if self.hinge:
+					pos.rotate(self.hinge.rotation)
+				pos += position
+				color = d['color']
+				vertices = d['vertices']
+				r = d['radius']*size
+				steps = int(360/vertices)
+				points = [Vec2d(math.sin(math.radians(x))*r, math.cos(math.radians(x))*r)+pos for x in range(0, 360, steps)]
+				#print(points)
+				draw.polygon(points, color)
+				#draw.points2(points, color, size=10.0, alpha=255.0)
+			elif d['draw'] == 'poly':
+				raise NotImplementedError
 
 
-class BodyBase(GeneratedPart):
+class Base(GeneratedPart):
+	def __init__(self, hinge):
+		GeneratedPart.__init__(self, hinge)
+		self.origSize = self.size
+		self.time = 0
 
 	def onCollision(self):
 		raise NotImplementedError
 
+	def update(self, dt):
+		self.time += dt
+		mod = math.sin(self.time*2)*0.025
+		self.size = self.origSize + mod
+		for hinge in self.getHinges():
+			hinge.setPosition(hinge.origPosition * (1+mod))
+
 	def getHandles(self):
-		return {'collision': self.onCollision}
+		return {'collision': self.onCollision, 'update': self.update}
 
 
 class Mouth(GeneratedPart):
-
 	def onCollision(self):
 		raise NotImplementedError
 
@@ -288,6 +314,7 @@ class Eye(GeneratedPart):
 	def getHandles(self):
 		return {'mouseMovement': self.onMouse}
 
+
 class Paddle(GeneratedPart):
 
 	def onBodyMovement(self, mv):
@@ -297,4 +324,4 @@ class Paddle(GeneratedPart):
 		return {'bodyMovement': self.onBodyMovement}
 
 
-CLASSNAME2CLASS = {'BodyBase': BodyBase, 'Mouth': Mouth, 'Eye':Eye, 'Paddle':Paddle}
+CLASSNAME2CLASS = {'Base': Base, 'Mouth': Mouth, 'Eye': Eye, 'Paddle': Paddle}
