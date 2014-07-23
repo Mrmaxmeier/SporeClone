@@ -4,7 +4,8 @@ from cx_Freeze import setup, Executable
 # fine tuning.
 buildOptions = dict(packages=["OpenGL"],
 					include_files=['data/'],
-					excludes=['tkinter']
+					excludes=['tkinter'],
+					icon="icon.icns"
 					)
 
 base = None
