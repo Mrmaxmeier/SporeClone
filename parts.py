@@ -2,6 +2,8 @@ import draw
 from vector2 import Vec2d
 import math
 
+import collision
+
 
 class Hinge(object):
 
@@ -74,16 +76,16 @@ class Part(object):
 	def getAllSubParts(self, position, size, getHinges=False, onlyGetEmptyHinges=True):
 		partsList = []
 		if not getHinges:
-			partsList.append((self, position))
+			partsList.append((self, position, size))
 		for hinge in self.getHinges():
 			if hinge.hasPart():
 				relpos = hinge.position * size
 				relpos.rotate(hinge.rotation)
 				newpos = relpos + position
 				if getHinges and not onlyGetEmptyHinges:
-					partsList.append((hinge, newpos))
+					partsList.append((hinge, newpos, size))
 				elif not getHinges:
-					partsList.append((hinge.getPart(), newpos))
+					partsList.append((hinge.getPart(), newpos, size))
 				subParts = hinge.getPart().getAllSubParts(newpos, hinge.getPart().size*size, getHinges, onlyGetEmptyHinges)
 				partsList += subParts
 			else:
@@ -91,9 +93,23 @@ class Part(object):
 					relpos = hinge.position * size
 					relpos.rotate(hinge.rotation)
 					newpos = relpos + position
-					partsList.append((hinge, newpos))
+					partsList.append((hinge, newpos, size))
 		#log(self.name, position, partsList, level='MATH')
 		return partsList
+
+	def getAllSubHinges(self, position, size):
+		hingeList = []
+		subList = []
+		for hinge in self.getHinges():
+			relpos = hinge.position * size
+			relpos.rotate(hinge.rotation)
+			newpos = relpos + position
+			if hinge.hasPart():
+				subHinges = hinge.getPart().getAllSubHinges(newpos, hinge.getPart().size*size)
+				subList += subHinges
+			hingeList.append((hinge, newpos, size))
+		hingeList += subList
+		return hingeList
 
 	def getHinges(self):
 		return []
@@ -101,7 +117,7 @@ class Part(object):
 	def update(self, dt):
 		pass
 
-	def collides(self, ownpos, collpos, size):
+	def collides(self, collpos, ownpos, size):
 		distancesqrt = ownpos.get_dist_sqrd(collpos)
 		radius = self.size*size
 		return distancesqrt < (radius ** 2)
@@ -250,7 +266,60 @@ class GeneratedPart(GenericPart):
 				draw.polygon(points, color)
 				#draw.points2(points, color, size=10.0, alpha=255.0)
 			elif d['draw'] == 'poly':
-				raise NotImplementedError
+				color = d['color']
+				points = d['points']
+				for p in points:
+					p *= size
+					if self.hinge:
+						p.rotate(self.hinge.rotation)
+					p += position
+				draw.polygon(points, color)
+
+	def collides(self, collisionPoint, ownPosition, ownSize):
+		#print(collisionPoint, ownPosition, ownSize)
+		self.collisionPolys = []
+		for d in self.structure:
+			if d['draw'] == 'point':
+				pos = Vec2d(d['position'])*ownSize
+				if self.hinge:
+					pos.rotate(self.hinge.rotation)
+				pos += ownPosition
+				s = d['size'] * ownSize
+				self.collisionPolys.append([pos-Vec2d(s, s), pos-Vec2d(s, -s), pos-Vec2d(-s, -s), pos-Vec2d(-s, s)])
+			elif d['draw'] == 'rect':
+				p1, p3 = d['positions']
+				p1 = Vec2d(p1)*ownSize
+				p3 = Vec2d(p3)*ownSize
+				if self.hinge:
+					p1.rotate(self.hinge.rotation)
+					p3.rotate(self.hinge.rotation)
+				p1 += ownPosition
+				p3 += ownPosition
+				p2 = Vec2d(p1.x, p3.y)
+				p4 = Vec2d(p3.x, p1.y)
+				self.collisionPolys.append([p1, p2, p3, p4])
+			elif d['draw'] == 'ngon':
+				pos = Vec2d(d['position'])*ownSize
+				if self.hinge:
+					pos.rotate(self.hinge.rotation)
+				pos += ownPosition
+				vertices = d['vertices']
+				r = d['radius']*ownSize
+				steps = int(360/vertices)
+				points = [Vec2d(math.sin(math.radians(x))*r, math.cos(math.radians(x))*r)+pos for x in range(0, 360, steps)]
+				self.collisionPolys.append(points)
+			elif d['draw'] == 'poly':
+				points = d['points']
+				for p in points:
+					p *= ownSize
+					if self.hinge:
+						p.rotate(self.hinge.rotation)
+					p += ownPosition
+				self.collisionPolys.append(points)
+		for poly in self.collisionPolys:
+			if collision.polyPointCollides(poly, collisionPoint):
+				return True
+		return False
 
 
 class Base(GeneratedPart):
