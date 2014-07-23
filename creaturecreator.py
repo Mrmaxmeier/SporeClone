@@ -50,7 +50,6 @@ class PartSelector(object):
 				hinge.setPart(part)
 				hingeRow.append(hinge)
 			self.hinges.append(hingeRow)
-		print(self.hinges)
 
 	def draw(self):
 		for hingeRow in self.hinges:
@@ -67,7 +66,6 @@ class PartSelector(object):
 				for h in row:
 					p = h.getPart()
 					if p.collides(mousePosition, h.position, 10):
-						print('COLLISION!', p, h)
 						self.mouseHinge.setPart(p)
 						break
 
@@ -76,6 +74,11 @@ class CreatureCreator(StdMain):
 
 	def __init__(self):
 		self.mousePos = Vec2d(0, 0)
+		#Font
+		self.myfont = pygame.font.SysFont("Courier New", 32, bold=True)
+		self.fps_display = font.RenderText("", [0, 0, 0], self.myfont)
+		self.creature_name = font.RenderText("...Loading...", [0, 0, 0], self.myfont)
+		#Parts
 		self.partManager = manager.PartManager()
 		self.creatureManager = manager.CreatureManager(self.partManager)
 		self.creatureCount = len(self.creatureManager.getAvalibleCreatures())
@@ -86,8 +89,6 @@ class CreatureCreator(StdMain):
 		#
 		#
 		#
-		self.myfont = pygame.font.SysFont("Courier New", 32, bold=True)
-		self.fps_display = font.RenderText("", [0, 0, 0], self.myfont)
 
 		self.mouseHinge = parts.Hinge(Vec2d(0, 0))
 		#self.mouseHinge.setPart(self.partManager.getPart('Eye')(self.mouseHinge))
@@ -100,6 +101,7 @@ class CreatureCreator(StdMain):
 		#print(self.creatureManager.activeCreature.size)
 		activeCreature.size *= 20
 		self.updateCreature()
+		self.creature_name.change_text(activeCreature.name)
 
 	def updateCreature(self):
 		activeCreature = self.creatureManager.activeCreature
@@ -121,7 +123,7 @@ class CreatureCreator(StdMain):
 			self.setActiveCreature(self.currentCreatureIndex)
 			print('Swapped Creature to', self.creatureManager.activeCreature.name)
 		elif ev.unicode == 's':
-			print()
+			print('Saving Creature')
 			self.creatureManager.saveActiveCreature('savedCreature.json')
 
 	def update(self, dt):
@@ -133,12 +135,14 @@ class CreatureCreator(StdMain):
 
 	def draw(self):
 		self.creatureManager.activeCreature.draw(WINDOWSIZE/2)
-		self.fps_display.draw([10, 10])
 		if self.mouseHinge.hasPart():
 			self.mouseHinge.getPart().draw(self.mouseHinge.position, 10)
 			# 10: Size
 		self.mouseHinge.draw(self.mouseHinge.position, 10)
 		self.partSelector.draw()
+		self.fps_display.draw([10, 10])
+		d = 20+20*len(self.creatureManager.activeCreature.name)
+		self.creature_name.draw([WINDOWSIZE.x-d, 10])
 
 	def onMouseMotion(self, ev):
 		self.mousePos = Vec2d(ev.pos[0], ev.pos[1])
@@ -149,7 +153,6 @@ class CreatureCreator(StdMain):
 		print(ev)
 		if ev.button == 1:
 			for h, pos, size in self.activeAllHinges:
-				print(ev.pos, pos, size)
 				if h.collides(Vec2d(ev.pos[0], ev.pos[1]), pos, size*5):
 					if self.mouseHinge.hasPart():
 						h.setPart(copy.deepcopy(self.mouseHinge.getPart()))
