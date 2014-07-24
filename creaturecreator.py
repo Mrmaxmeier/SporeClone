@@ -169,6 +169,13 @@ class CreatureCreator(StdMain):
 		elif ev.button == 3:
 			if self.mouseHinge.hasPart():
 				self.mouseHinge.setPart(None)
+		elif ev.button == 4 or ev.button == 5:
+			sizeDirection = 0.1 if ev.button == 4 else -0.1
+			for h, pos, size in self.activeAllHinges:
+				if h.hasPart():
+					if h.collides(Vec2d(ev.pos[0], ev.pos[1]), pos, size*5):
+						h.getPart().setSize(h.getPart().size + sizeDirection, setOrigSize=True)
+						print('RESIZED')
 
 
 mainloop((WINDOWSIZE, TITLE, FPS), CreatureCreator, draw.white)

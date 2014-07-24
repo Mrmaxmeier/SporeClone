@@ -133,15 +133,18 @@ class Part(object):
 				self.size = self.sizeRange[0]
 		#self.update()
 
-	def setSize(self, size):
+	def setSize(self, size, setOrigSize=False):
 		self.size = size
 		if self.sizeRange[0] <= self.size <= self.sizeRange[1]:
-			self.update(0.0)
+			pass
 		else:
 			if self.size > self.sizeRange[1]:
 				self.size = self.sizeRange[1]
 			else:
 				self.size = self.sizeRange[0]
+		if setOrigSize:
+			self.origSize = self.size
+		self.update(0.0)
 
 	def getHandles(self):
 		return {}
