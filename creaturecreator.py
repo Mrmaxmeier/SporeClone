@@ -166,6 +166,13 @@ class CreatureCreator(StdMain):
 						print('Click -> Mouse')
 						self.updateCreature()
 			self.partSelector.onClick(ev)
+		elif ev.button == 2:
+			mods = pygame.key.get_mods()
+			if mods & pygame.KMOD_LALT or mods & pygame.KMOD_RALT:
+				#print('Leftclick w/ alternate', '(on stock OSX)')
+				for h, pos, size in self.activeAllHinges:
+					if h.collides(Vec2d(ev.pos[0], ev.pos[1]), pos, size*5):
+						self.mouseHinge.setPart(copy.deepcopy(h.getPart()))
 		elif ev.button == 3:
 			if self.mouseHinge.hasPart():
 				self.mouseHinge.setPart(None)
