@@ -10,6 +10,8 @@ import font
 import pygame
 import copy
 
+import sys
+
 
 TITLE = 'CreatureCreator'
 FPS = 60
@@ -45,7 +47,6 @@ class PartSelector(object):
 			hingeRow = []
 			for p in range(len(self.parts[row])):
 				hinge = parts.Hinge(Vec2d(row * self.partMargin, p * self.partMargin) + self.partBorder)
-				print(hinge.position)
 				part = self.partManager.getPart(self.parts[row][p])(hinge)
 				hinge.setPart(part)
 				hingeRow.append(hinge)
@@ -150,10 +151,22 @@ class CreatureCreator(StdMain):
 		self.mouseHinge.setPosition(self.mousePos)
 
 	def onClick(self, ev):
-		print(ev)
-		if ev.button == 1:
+		button = ev.button
+		positionVec = Vec2d(ev.pos[0], ev.pos[1])
+
+		#
+		key_mods = pygame.key.get_mods()
+		# MacOS LClick + Alt -> MClick fix
+		if sys.platform == 'darwin':
+			if key_mods & pygame.KMOD_LALT or key_mods & pygame.KMOD_RALT:
+				if button == 2:
+					button = 1
+					ev.button = 1
+					print('modded Button')
+
+		if button == 1:
 			for h, pos, size in self.activeAllHinges:
-				if h.collides(Vec2d(ev.pos[0], ev.pos[1]), pos, size*5):
+				if h.collides(positionVec, pos, size*5):
 					if self.mouseHinge.hasPart():
 						h.setPart(copy.deepcopy(self.mouseHinge.getPart()))
 						h.getPart().hinge = h
@@ -162,25 +175,22 @@ class CreatureCreator(StdMain):
 						self.updateCreature()
 					else:
 						self.mouseHinge.setPart(copy.deepcopy(h.getPart()))
-						h.setPart(None)
+						if key_mods & pygame.KMOD_LALT or key_mods & pygame.KMOD_RALT:
+							pass
+							#print('Leftclick w/ alternate', '(on stock OSX)')
+						else:
+							h.setPart(None)
 						print('Click -> Mouse')
 						self.updateCreature()
 			self.partSelector.onClick(ev)
-		elif ev.button == 2:
-			mods = pygame.key.get_mods()
-			if mods & pygame.KMOD_LALT or mods & pygame.KMOD_RALT:
-				#print('Leftclick w/ alternate', '(on stock OSX)')
-				for h, pos, size in self.activeAllHinges:
-					if h.collides(Vec2d(ev.pos[0], ev.pos[1]), pos, size*5):
-						self.mouseHinge.setPart(copy.deepcopy(h.getPart()))
-		elif ev.button == 3:
+		elif button == 3:
 			if self.mouseHinge.hasPart():
 				self.mouseHinge.setPart(None)
-		elif ev.button == 4 or ev.button == 5:
-			sizeDirection = 0.1 if ev.button == 4 else -0.1
+		elif button == 4 or button == 5:
+			sizeDirection = 0.1 if button == 4 else -0.1
 			for h, pos, size in self.activeAllHinges:
 				if h.hasPart():
-					if h.collides(Vec2d(ev.pos[0], ev.pos[1]), pos, size*5):
+					if h.collides(positionVec, pos, size*5):
 						h.getPart().setSize(h.getPart().size + sizeDirection, setOrigSize=True)
 						print('RESIZED')
 
