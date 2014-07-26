@@ -1,6 +1,6 @@
 class EventHandler(object):
 	def __init__(self):
-		self.handlers = {'bodyMovement':[], 'mouseMovement':[], 'collision':[]}
+		self.handlers = {'bodyMovement': [], 'mouseMovement': [], 'collision': []}
 
 	def update(self, dt):
 		self.callHandlers('update', dt)
