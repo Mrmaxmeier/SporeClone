@@ -1,7 +1,7 @@
 /.DS_Store
-
 /__pycache__/
-
 .DS_Store
-
 /build/
+*.app.zip
+*.app
+*.dmg
