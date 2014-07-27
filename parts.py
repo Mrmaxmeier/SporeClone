@@ -203,7 +203,7 @@ class GenericPart(Part):
 		if 'stats' in d:
 			classDict['stats'] = d['stats']
 		else:
-			self.stats = {}
+			classDict['stats'] = {}
 		if 'structure' in d:
 			struct = d['structure']
 			struct.sort(key=lambda s: s['layer'] if 'layer' in s else 0)

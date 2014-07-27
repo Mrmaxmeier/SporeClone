@@ -30,6 +30,29 @@ def generateBodyHinge(struct, partManager):
 	return h
 
 
+def mergeDict(d1, d2):
+	for key in d2:
+		if key in d1:
+			d1[key] += d2[key]
+		else:
+			d1[key] = d2[key]
+	return d1
+
+
+def generateSubStats(part):
+	d = part.stats
+	for h in part.getHinges():
+		if h.hasPart():
+			d = mergeDict(d, generateSubStats(h.getPart()))
+	return d
+
+
+def generateStats(hinge):
+	if hinge.hasPart():
+		return generateSubStats(hinge.getPart())
+	return []
+
+
 def generateSubStructure(part):
 	d = {'name': part.name, 'sizeMod': part.origSize, 'attatched': {}}
 	hinges = part.getHinges()
@@ -71,6 +94,7 @@ class GenericBody(object):
 			classDict['name'] = 'UnnamedGeneratedBody | FIXME'
 		if 'structure' in d:
 			classDict['baseHinge'] = generateBodyHinge(d['structure'], partManager)
+			classDict['stats'] = generateStats(classDict['baseHinge'])
 		else:
 			raise NotImplementedError
 		classDict['size'] = 1
