@@ -30,8 +30,8 @@ class CreatureManager:
 		raise NotImplementedError
 
 	def getCreature(self, name):
-		if name in self.creatures:
-			return self.creatures[name]
+		if name in self.avalibleCreatures:
+			return self.avalibleCreatures[name]
 		else:
 			return None
 
