@@ -56,19 +56,47 @@ class Button(object):
 
 
 class Menu(object):
-	def __init__(self, screenSize, callback, buttons=['Cancel', 'Okee', 'Okidoki', 'OfCOOurs'], title='Wähle deine AAAntwort'):
+	def __init__(self, screenSize, callback, buttons=['Cancel', 'Okee', 'OfCOOurs'], title='Wähle deine Antwort', buttonScroll=False):
 		self.screenSize = screenSize
 		self.middle = screenSize / 2
 		self.scale = screenSize / 6
 
 		self.myfont = pygame.font.SysFont("Courier New", 32, bold=True)
 
+		self.buttonTexts = buttons
+		self.buttonScroll = buttonScroll
+
 		self.callback = callback
-		self.buttons = []
+		charWidth = (self.scale.x / 8.0)
+		if buttonScroll:
+			self.buttonScrollIndex = 0
+			self.scrollButtons()
+		else:
+			self.setButtons(buttons)
+
+		labelPos = self.middle - Vec2d(0, self.scale.y / 2.0)
+		textSize = charWidth
+		#textSize = (charWidth * len(title) * 0.5) / len(title) * 2.0
+		self.titleLabel = Label(title, labelPos, textSize, self.myfont, side='centered')
+
+	def scrollButtons(self):
+		index = self.buttonScrollIndex
+		buttonNum = 2
+		b = self.buttonTexts[index:index+buttonNum]
+		if index > 0:
+			buttons = ['<--'] + b
+		else:
+			buttons = b
+		if index + buttonNum < len(self.buttonTexts):
+			buttons += ['-->']
+		self.setButtons(buttons)
+
+	def setButtons(self, buttons):
 		charWidth = (self.scale.x / 8.0)
 		totalLength = sum([charWidth * len(text) for text in buttons])
 		self.totalLength = totalLength
 		currLength = -(totalLength / 2.0)
+		self.buttons = []
 		for i in range(len(buttons)):
 			text = buttons[i]
 			step = charWidth * len(text) * 0.5
@@ -79,11 +107,6 @@ class Menu(object):
 			print('Position', pos)
 			b = Button(text, pos, step * 0.9, self.myfont)
 			self.buttons.append(b)
-
-		labelPos = self.middle - Vec2d(0, self.scale.y / 2.0)
-		textSize = charWidth
-		#textSize = (charWidth * len(title) * 0.5) / len(title) * 2.0
-		self.titleLabel = Label(title, labelPos, textSize, self.myfont, side='centered')
 
 	def getCollision(self, pos):
 		for b in self.buttons:
@@ -110,6 +133,14 @@ class Menu(object):
 	def mouseButton(self, event):
 		pos = Vec2d(event.pos[0], event.pos[1])
 		result = self.getCollision(pos)
+		if self.buttonScroll and result:
+			if result.text in ['<--', '-->']:
+				if result.text == '<--':
+					self.buttonScrollIndex -= 1
+				else:
+					self.buttonScrollIndex += 1
+				self.scrollButtons()
+				return False
 		if result:
 			self.callback(result.text)
 

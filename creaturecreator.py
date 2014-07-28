@@ -142,7 +142,8 @@ class CreatureCreator(StdMain):
 					return
 				self.setActiveCreature(result)
 				self.menu = False
-			self.menu = menu.Menu(WINDOWSIZE, menuCallback, buttons=['Cancel']+self.creatureManager.getAvalibleCreatures(), title='Open...?')
+			b = ['Cancel']+self.creatureManager.getAvalibleCreatures()
+			self.menu = menu.Menu(WINDOWSIZE, menuCallback, buttons=b, title='Open...?', buttonScroll=True)
 
 	def update(self, dt):
 		self.eventHandler.update(dt)
@@ -152,17 +153,18 @@ class CreatureCreator(StdMain):
 		pass
 
 	def draw(self):
-		self.creatureManager.activeCreature.draw(WINDOWSIZE/2)
-		if self.mouseHinge.hasPart():
-			self.mouseHinge.getPart().draw(self.mouseHinge.position, 10)
-			# 10: Size
-		self.mouseHinge.draw(self.mouseHinge.position, 10)
-		self.partSelector.draw()
-		self.fps_display.draw([10, 10])
-		d = 20+20*len(self.creatureManager.activeCreature.name)
-		self.creature_name.draw([WINDOWSIZE.x-d, 10])
 		if self.menu:
 			self.menu.draw()
+		else:
+			self.creatureManager.activeCreature.draw(WINDOWSIZE/2)
+			if self.mouseHinge.hasPart():
+				self.mouseHinge.getPart().draw(self.mouseHinge.position, 10)
+				# 10: Size
+			self.mouseHinge.draw(self.mouseHinge.position, 10)
+			self.partSelector.draw()
+			self.fps_display.draw([10, 10])
+			d = 20+20*len(self.creatureManager.activeCreature.name)
+			self.creature_name.draw([WINDOWSIZE.x-d, 10])
 
 	def onMouseMotion(self, ev):
 		self.mousePos = Vec2d(ev.pos[0], ev.pos[1])
@@ -172,6 +174,10 @@ class CreatureCreator(StdMain):
 			self.menu.mouseMovement(self.mousePos)
 
 	def onClick(self, ev):
+		if self.menu:
+			self.menu.mouseButton(ev)
+			return False
+
 		button = ev.button
 		positionVec = Vec2d(ev.pos[0], ev.pos[1])
 
@@ -214,8 +220,6 @@ class CreatureCreator(StdMain):
 					if h.collides(positionVec, pos, size*5):
 						h.getPart().setSize(h.getPart().size + sizeDirection, setOrigSize=True)
 						print('RESIZED')
-		if self.menu:
-			self.menu.mouseButton(ev)
 
 
 mainloop((WINDOWSIZE, TITLE, FPS), CreatureCreator, draw.white)
