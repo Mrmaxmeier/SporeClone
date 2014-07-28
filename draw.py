@@ -94,7 +94,7 @@ def lines(points, color, width=1, aa=True, closed=0, alpha=255.0, stipple_factor
 		glLineStipple(stipple_factor, stipple_pattern)
 		glEnable(GL_LINE_STIPPLE)
 	glBegin(GL_LINE_STRIP)
-	glColor4f(color[0] / 255.0, color[1] / 255.0, color[2] / 255.0, alpha / 255.0)
+	glColor4f(toColor(color[0]), toColor(color[1]), toColor(color[2]), alpha / 255.0)
 	points = flip_points(points)
 	for p in points:
 		glVertex3f(p[0], p[1], 0)
