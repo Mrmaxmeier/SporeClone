@@ -12,6 +12,8 @@ import copy
 
 import sys
 
+import menu
+
 
 TITLE = 'CreatureCreator'
 FPS = 60
@@ -94,10 +96,16 @@ class CreatureCreator(StdMain):
 		self.mouseHinge = parts.Hinge(Vec2d(0, 0))
 		#self.mouseHinge.setPart(self.partManager.getPart('Eye')(self.mouseHinge))
 		self.partSelector = PartSelector(self.partManager, WINDOWSIZE, self.mouseHinge)
+		self.menu = False
 
-	def setActiveCreature(self, num):
+	def setActiveCreature(self, arg):
 		avalible = self.creatureManager.getAvalibleCreatures()
-		assert self.creatureManager.setActiveCreature(avalible[num]) is True, 'No Creature loaded'
+		if isinstance(arg, int):
+			crea = avalible[arg]
+		elif isinstance(arg, str):
+			crea = arg
+
+		assert self.creatureManager.setActiveCreature(crea) is True, 'No Creature loaded'
 		activeCreature = self.creatureManager.activeCreature
 		#print(self.creatureManager.activeCreature.size)
 		activeCreature.size *= 20
@@ -126,6 +134,15 @@ class CreatureCreator(StdMain):
 		elif ev.unicode == 's':
 			print('Saving Creature')
 			self.creatureManager.saveActiveCreature('savedCreature.json')
+		elif ev.unicode == 'o':
+			def menuCallback(result):
+				print(result)
+				if result == 'Cancel':
+					self.menu = False
+					return
+				self.setActiveCreature(result)
+				self.menu = False
+			self.menu = menu.Menu(WINDOWSIZE, menuCallback, buttons=['Cancel']+self.creatureManager.getAvalibleCreatures(), title='Open...?')
 
 	def update(self, dt):
 		self.eventHandler.update(dt)
@@ -144,11 +161,15 @@ class CreatureCreator(StdMain):
 		self.fps_display.draw([10, 10])
 		d = 20+20*len(self.creatureManager.activeCreature.name)
 		self.creature_name.draw([WINDOWSIZE.x-d, 10])
+		if self.menu:
+			self.menu.draw()
 
 	def onMouseMotion(self, ev):
 		self.mousePos = Vec2d(ev.pos[0], ev.pos[1])
 		self.eventHandler.mouseMovement(self.mousePos)
 		self.mouseHinge.setPosition(self.mousePos)
+		if self.menu:
+			self.menu.mouseMovement(self.mousePos)
 
 	def onClick(self, ev):
 		button = ev.button
@@ -193,6 +214,8 @@ class CreatureCreator(StdMain):
 					if h.collides(positionVec, pos, size*5):
 						h.getPart().setSize(h.getPart().size + sizeDirection, setOrigSize=True)
 						print('RESIZED')
+		if self.menu:
+			self.menu.mouseButton(ev)
 
 
 mainloop((WINDOWSIZE, TITLE, FPS), CreatureCreator, draw.white)
