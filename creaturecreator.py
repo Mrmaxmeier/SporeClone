@@ -1,4 +1,4 @@
-from mainloop import init, mainloop, StdMain
+from mainloop import mainloop, StdMain
 from vector2 import Vec2d
 
 import manager
@@ -14,12 +14,14 @@ import sys
 
 import menu
 
+import client
+import queue
+
 
 TITLE = 'CreatureCreator'
 FPS = 60
 WINDOWSIZE = Vec2d(1920, 1080) * 0.8
 WINDOWSIZE = Vec2d(int(WINDOWSIZE[0]), int(WINDOWSIZE[1]))
-init(WINDOWSIZE, '--Loading--')
 
 
 class PartSelector(object):
@@ -96,7 +98,17 @@ class CreatureCreator(StdMain):
 		self.mouseHinge = parts.Hinge(Vec2d(0, 0))
 		#self.mouseHinge.setPart(self.partManager.getPart('Eye')(self.mouseHinge))
 		self.partSelector = PartSelector(self.partManager, WINDOWSIZE, self.mouseHinge)
+
+		#
+
 		self.menu = False
+
+		#
+
+		self.clientQueue = queue.Queue()
+		self.clientThread = client.Client(self.clientQueue)
+		self.clientThread.start()
+		self.clientThread.send({'joined': 'creaturecreator'})
 
 	def setActiveCreature(self, arg):
 		avalible = self.creatureManager.getAvalibleCreatures()
@@ -148,6 +160,12 @@ class CreatureCreator(StdMain):
 	def update(self, dt):
 		self.eventHandler.update(dt)
 		self.fps_display.change_text(str(int(self.clock.get_fps())) + " fps")
+		try:
+			d = self.clientQueue.get_nowait()
+			self.handleServerData(d)
+			self.clientQueue.task_done()
+		except queue.Empty:
+			pass
 
 	def onActiveEvent(self, ev):
 		pass
@@ -221,5 +239,9 @@ class CreatureCreator(StdMain):
 						h.getPart().setSize(h.getPart().size + sizeDirection, setOrigSize=True)
 						print('RESIZED')
 
+	def handleServerData(self, d):
+		print('ServerData', d)
 
-mainloop((WINDOWSIZE, TITLE, FPS), CreatureCreator, draw.white)
+
+creatureCreatorObj = mainloop((WINDOWSIZE, TITLE, FPS), CreatureCreator, draw.white)
+creatureCreatorObj.clientThread.sockAlive = False
