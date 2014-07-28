@@ -30,24 +30,27 @@ class TCPServer(socketserver.ThreadingTCPServer):
 
 class ServerHandler(socketserver.BaseRequestHandler):
 
-	def processJson(self, d):
-		if 'joined' in d:
-			#playerDict = d['joined']
-			#name = playerDict['name']
-			#newPlayer = NetworkPlayer()
-			raise NotImplementedError
-		return {'result': True}
+	def handleData(self, d):
+		return {'return': 'no_response'}
 
 	def handle(self):
 		try:
-			data = json.loads(self.request.recv(1024).decode('UTF-8').strip())
-			# process the data, i.e. print it:
-			print(data)
-			# send some 'ok' back
-			self.request.sendall(bytes(json.dumps({'return': 'ok'}), 'UTF-8'))
-			self.request.sendall(bytes(json.dumps({'return': 'määä'}), 'UTF-8'))
+			while 1:
+				bdata = self.request.recv(1024 * 10)
+				if bdata == b'':
+					print('Connection Closed!')
+					return
+				data = json.loads(bdata.decode('UTF-8').strip())
+				# process the data, i.e. print it:
+				print("Recv'ed", data)
+				response = self.handleData(data)
+				# send some 'ok' back
+				respBytes = bytes(json.dumps(response), 'UTF-8')
+				self.request.sendall(respBytes)
 		except Exception as e:
 			print("Exception wile receiving message: ", e)
 
-server = TCPServer(('127.0.0.1', 13373), ServerHandler)
-server.serve_forever()
+
+if __name__ == "__main__":
+	server = TCPServer(('127.0.0.1', 13373), ServerHandler)
+	server.serve_forever()

@@ -8,25 +8,38 @@ paths = {'parts': 'data/parts',
 	'creatures': 'data/creatures'}
 
 
-def loadPart(filename):
+def loadPartFile(filename):
 	with open(filename, "r") as jsonfile:
-		data = json.loads(jsonfile.read())
-		partClass = parts.GenericPart().getClass(data)
-		return partClass
+		return loadPart(jsonfile.read())
 
 
-def loadCreature(filename, partManager):
+def loadPart(jsonstr):
+	data = json.loads(jsonstr)
+	partClass = parts.GenericPart().getClass(data)
+	return partClass
+
+
+def loadCreatureFile(filename, partManager):
 	with open(filename, "r") as jsonfile:
-		data = json.loads(jsonfile.read())
-		bodyClass = body.GenericBody().getClass(data, partManager)
-		return bodyClass
+		return loadCreature(jsonfile.read(), partManager)
 
 
-def saveCreature(filename, creatureObj, creatureName=False):
-	json = creatureObj.getJson(creatureName)
+def loadCreature(jsonstr, partManager):
+	data = json.loads(jsonstr)
+	bodyClass = body.GenericBody().getClass(data, partManager)
+	return bodyClass
+
+
+def saveCreatureFile(filename, creatureObj, creatureName=False):
+	json = saveCreature(creatureObj, creatureName)
 	with open(paths['creatures']+"/"+filename, "w") as jsonfile:
 		jsonfile.write(json)
 	print('Wrote', filename)
+
+
+def saveCreature(creatureObj, creatureName=False):
+	json = creatureObj.getJson(creatureName)
+	return json
 
 
 def loadGame(filename):
@@ -43,7 +56,7 @@ def loadAllParts():
 	for f in sorted(os.listdir(path)):
 		if f.endswith(".json"):
 			print('Loading Part', f)
-			p = loadPart(path+"/"+f)
+			p = loadPartFile(path+"/"+f)
 			parts[p.name] = p
 	return parts
 
@@ -55,6 +68,6 @@ def loadAllCreatures(partManager):
 	for f in sorted(os.listdir(path)):
 		if f.endswith(".json"):
 			print('Loading Creature', f)
-			c = loadCreature(path+"/"+f, partManager)
+			c = loadCreatureFile(path+"/"+f, partManager)
 			creatures[c.name] = c
 	return creatures

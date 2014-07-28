@@ -81,7 +81,7 @@ class Menu(object):
 
 	def scrollButtons(self):
 		index = self.buttonScrollIndex
-		buttonNum = 2
+		buttonNum = 3
 		b = self.buttonTexts[index:index+buttonNum]
 		if index > 0:
 			buttons = ['<--'] + b

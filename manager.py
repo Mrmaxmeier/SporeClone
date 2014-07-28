@@ -24,7 +24,7 @@ class CreatureManager:
 		self.partManager = partManager
 		self.creatures = {}
 		self.activeCreature = None
-		self.avalibleCreatures = fileParser.loadAllCreatures(self.partManager)
+		self.avalibleCreatures = {}
 
 	def addCreature(self):
 		raise NotImplementedError
@@ -51,6 +51,11 @@ class CreatureManager:
 			return True
 		else:
 			return False
+
+	def loadJson(self, json):
+		creature = fileParser.loadCreature(json, self.partManager)
+		self.avalibleCreatures[creature.name] = creature
+		print(creature)
 
 
 class GameManager:

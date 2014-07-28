@@ -2,6 +2,7 @@ from mainloop import mainloop, StdMain
 from vector2 import Vec2d
 
 import manager
+import fileParser
 import eventhandler
 import parts
 
@@ -10,12 +11,21 @@ import font
 import pygame
 import copy
 
+import json
+
 import sys
 
 import menu
 
 import client
 import queue
+
+
+#
+
+STARTUP_CREATURE = """{"name":"New Creature","structure":{"name":"Base","sizeMod":1,"attatched":{}}}"""
+
+#
 
 
 TITLE = 'CreatureCreator'
@@ -86,10 +96,10 @@ class CreatureCreator(StdMain):
 		#Parts
 		self.partManager = manager.PartManager()
 		self.creatureManager = manager.CreatureManager(self.partManager)
-		self.creatureCount = len(self.creatureManager.getAvalibleCreatures())
-		assert self.creatureCount > 0, 'No Creatures(.json) in Data/Creatures'
-		self.setActiveCreature(0)
-		self.currentCreatureIndex = 0
+		self.creatureManager.activeCreature = fileParser.loadCreature(STARTUP_CREATURE, self.partManager)()
+		self.creatureManager.activeCreature.size *= 20
+		self.creature_name.change_text(self.creatureManager.activeCreature.name)
+		self.updateCreature()
 		#
 		#
 		#
@@ -140,9 +150,7 @@ class CreatureCreator(StdMain):
 			print('Resetting...')
 			self.__init__()
 		elif ev.unicode == '\t':
-			self.currentCreatureIndex = (self.currentCreatureIndex + 1) % self.creatureCount
-			self.setActiveCreature(self.currentCreatureIndex)
-			print('Swapped Creature to', self.creatureManager.activeCreature.name)
+			print('Pressed <TAB>')
 		elif ev.unicode == 's':
 			print('Saving Creature')
 			self.creatureManager.saveActiveCreature('savedCreature.json')
@@ -156,6 +164,22 @@ class CreatureCreator(StdMain):
 				self.menu = False
 			b = ['Cancel']+self.creatureManager.getAvalibleCreatures()
 			self.menu = menu.Menu(WINDOWSIZE, menuCallback, buttons=b, title='Open...?', buttonScroll=True)
+		elif ev.unicode == 'm':
+			def menuCallback(result):
+				if result == 'Cancel':
+					self.menu = False
+					return
+				elif result == 'Fetch Creatures':
+					self.clientThread.send({'creature': {'request': 'ALL'}})
+				elif result == 'Share current Creature':
+					activeCreature = self.creatureManager.activeCreature
+					json = activeCreature.getJson()
+					self.clientThread.send({'creature': {'add': json}})
+				else:
+					print(result)
+				self.menu = False
+			b = ['Cancel', 'Fetch Creatures', 'Share current Creature']
+			self.menu = menu.Menu(WINDOWSIZE, menuCallback, buttons=b, title='Actions?')
 
 	def update(self, dt):
 		self.eventHandler.update(dt)
@@ -241,7 +265,13 @@ class CreatureCreator(StdMain):
 
 	def handleServerData(self, d):
 		print('ServerData', d)
+		if 'creatures' in d:
+			creatureList = d['creatures']
+			for creatureDict in creatureList:
+				creatureJson = json.dumps(creatureDict)
+				self.creatureManager.loadJson(creatureJson)
 
 
 creatureCreatorObj = mainloop((WINDOWSIZE, TITLE, FPS), CreatureCreator, draw.white)
 creatureCreatorObj.clientThread.sockAlive = False
+creatureCreatorObj.clientThread.close()

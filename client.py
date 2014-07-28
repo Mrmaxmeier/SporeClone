@@ -22,20 +22,23 @@ class Client(threading.Thread):
 	def send(self, d):
 		self.sock.send(bytes(json.dumps(d), 'UTF-8'))
 
-	def recv(self, size=1024):
+	def recv(self, size=1024 * 10):
 		try:
 			data = self.sock.recv(size)
 			if data == b'':
 				self.sockAlive = False
 				return {'connectionStatus': 'closed'}
-			return json.loads(data.decode('UTF-8'))
+			decoded = data.decode('UTF-8')
+			print(decoded)
+			return json.loads(decoded)
 		except Exception as e:
 			return {'return': {'type': 'Malformed Data', 'exception': str(e)}}
 
 	def recvLoop(self):
 		while self.sockAlive:
 			data = self.recv()
-			self.queue.put(data)
+			if data:
+				self.queue.put(data)
 
 	def close(self):
 		self.sock.close()
