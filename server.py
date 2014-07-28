@@ -52,5 +52,5 @@ class ServerHandler(socketserver.BaseRequestHandler):
 
 
 if __name__ == "__main__":
-	server = TCPServer(('127.0.0.1', 13373), ServerHandler)
+	server = TCPServer(('0.0.0.0', 13373), ServerHandler)
 	server.serve_forever()
