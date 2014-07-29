@@ -6,7 +6,18 @@ import font
 import pygame.font
 
 
-class Label(object):
+class Entry(object):
+	def onKey(self, ev):
+		pass
+
+	def draw(self):
+		pass
+
+	def collides(self, pos, click):
+		return False
+
+
+class Label(Entry):
 	def __init__(self, text, position, size, myfont, side='centered'):
 		self.text = text
 		self.position = position
@@ -25,7 +36,7 @@ class Label(object):
 		self.renderText.draw(self.position)
 
 
-class Button(object):
+class Button(Entry):
 	def __init__(self, text, position, width, myfont):
 		self.text = text
 		self.position = position
@@ -51,8 +62,51 @@ class Button(object):
 		#points2((self.position, self.position), red, size=5)
 		self.label.draw()
 
-	def collides(self, point):
+	def collides(self, point, click):
 		return polyPointCollides(self.points, point)
+
+
+class InputField(Label, Button):
+	def __init__(self, position, height, myfont, side='centered', text='InputField'):
+		self.initialPosition = position
+		self.initialHeight = height
+		self.myfont = myfont
+		self.side = side
+		self.text = text
+		Label.__init__(self, self.text, position, height, myfont, side)
+		self.highlighted = False
+
+		#ButtonInit
+
+		width = height * (len(text) * 1.0)
+		p1 = position + Vec2d(-width, height)
+		p2 = position + Vec2d(width, height)
+		p3 = position + Vec2d(width, -height)
+		p4 = position + Vec2d(-width, -height)
+		self.points = (p1, p2, p3, p4)
+
+	def onKey(self, event):
+		if self.highlighted:
+			print(event.unicode)
+			if event.unicode == '\x7f':
+				newText = self.text[:-1]
+			else:
+				newText = self.text + event.unicode
+			self.text = newText
+			Label.__init__(self, self.text, Vec2d(self.initialPosition), self.initialHeight, self.myfont, self.side)
+
+	def draw(self):
+		color = red if self.highlighted else blue
+		polygon(self.points, color, aa=True, alpha=255.0, stipple_pattern=None)
+		lines(self.points, color, width=3, aa=True, closed=1)
+		points2(self.points, color, size=9)
+		Label.draw(self)
+
+	def collides(self, point, click):
+		if click:
+			return False
+		else:
+			Button.collides(self, point, click)
 
 
 class Menu(object):
@@ -78,6 +132,8 @@ class Menu(object):
 		textSize = charWidth
 		#textSize = (charWidth * len(title) * 0.5) / len(title) * 2.0
 		self.titleLabel = Label(title, labelPos, textSize, self.myfont, side='centered')
+
+		self.entrys = [self.titleLabel]
 
 	def scrollButtons(self):
 		index = self.buttonScrollIndex
@@ -108,31 +164,30 @@ class Menu(object):
 			b = Button(text, pos, step * 0.9, self.myfont)
 			self.buttons.append(b)
 
-	def getCollision(self, pos):
-		for b in self.buttons:
-			if b.collides(pos):
-				return b
+	def getCollision(self, pos, click=False):
+		for e in self.entrys + self.buttons:
+			if e.collides(pos, click=False):
+				return e
 		return False
 
 	def draw(self):
 		#p2 = self.middle - Vec2d(self.totalLength / 2.0, 0)
 		#p3 = self.middle + Vec2d(self.totalLength / 2.0, 0)
 		#points2((self.middle, p2, p3), blue, size=15)
-		for b in self.buttons:
-			b.draw()
-		self.titleLabel.draw()
+		for e in self.entrys + self.buttons:
+			e.draw()
 
 	def mouseMovement(self, mousePosition):
 		result = self.getCollision(mousePosition)
-		for b in self.buttons:
-			b.highlighted = False
+		for e in self.buttons + self.entrys:
+			e.highlighted = False
 		if result:
 			#print('highlight', result)
 			result.highlighted = True
 
 	def mouseButton(self, event):
 		pos = Vec2d(event.pos[0], event.pos[1])
-		result = self.getCollision(pos)
+		result = self.getCollision(pos, click=True)
 		if self.buttonScroll and result:
 			if result.text in ['<--', '-->']:
 				if result.text == '<--':
@@ -144,6 +199,13 @@ class Menu(object):
 		if result:
 			self.callback(result.text)
 
+	def addEntry(self, entry):
+		self.entrys.append(entry)
+
+	def onKey(self, ev):
+		for e in self.entrys:
+			e.onKey(ev)
+
 
 from mainloop import init, mainloop, StdMain
 
@@ -154,6 +216,8 @@ class MenuMain(StdMain):
 			print(result)
 			self.cb(result)
 		self.m = Menu(WINDOWSIZE, callback)
+		inputfield = InputField(self.m.middle + Vec2d(0, 80), 10, self.m.myfont)
+		self.m.addEntry(inputfield)
 		for b in self.m.buttons:
 			print(b.text)
 			print(b.points)
@@ -173,6 +237,9 @@ class MenuMain(StdMain):
 
 	def onClick(self, ev):
 		self.m.mouseButton(ev)
+
+	def onKey(self, ev):
+		self.m.onKey(ev)
 
 if __name__ == "__main__":
 
