@@ -184,12 +184,13 @@ class CreatureCreator(StdMain):
 	def update(self, dt):
 		self.eventHandler.update(dt)
 		self.fps_display.change_text(str(int(self.clock.get_fps())) + " fps")
-		try:
-			d = self.clientQueue.get_nowait()
-			self.handleServerData(d)
-			self.clientQueue.task_done()
-		except queue.Empty:
-			pass
+		while True:
+			try:
+				d = self.clientQueue.get_nowait()
+				self.handleServerData(d)
+				self.clientQueue.task_done()
+			except queue.Empty:
+				break
 
 	def onActiveEvent(self, ev):
 		pass
