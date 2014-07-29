@@ -42,10 +42,13 @@ class CreatureCreatorServerHandler(ServerHandler):
 			if 'request' in d['creature']:
 				if d['creature']['request'] == 'ALL':
 					s = serverManagerObj.getAllCreatures()
-					print('s', s)
 					return {'response': 'creatures', 'creatures': s}
 			if 'add' in d['creature']:
 				serverManagerObj.addCreature(d['creature']['add'])
+				return self.handleData({'creature': {'request': 'ALL'}})
+		if 'join' in d:
+			return self.handleData({'creature': {'request': 'ALL'}})
+		return {'error': 'Message Not Parsed'}
 
 server = TCPServer(('127.0.0.1', 13373), CreatureCreatorServerHandler)
 server.serve_forever()
