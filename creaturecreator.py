@@ -319,6 +319,11 @@ class CreatureCreator(StdMain):
 		if self.clientConnected:
 			self.clientThread.sockAlive = False
 			self.clientThread.close()
+			while True:
+				if self.clientThread.is_alive():
+					print('Thread still alive!')
+				else:
+					break
 		print('Should be dead now!')
 
 

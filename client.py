@@ -18,6 +18,8 @@ class Client(threading.Thread):
 		self.supersock = supersocket.SuperSocket(self.sock)
 		self.sockAlive = True
 		self.queue = clientQueue
+		self.setDaemon(True)
+
 
 	def run(self):
 		self.recvLoop()
