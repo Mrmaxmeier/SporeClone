@@ -7,6 +7,9 @@ import pygame.font
 
 
 class Entry(object):
+	def __init__(self, name='UnnamedEntry'):
+		self.name = name
+
 	def onKey(self, ev):
 		pass
 
@@ -18,7 +21,8 @@ class Entry(object):
 
 
 class Label(Entry):
-	def __init__(self, text, position, size, myfont, side='centered'):
+	def __init__(self, text, position, size, myfont, side='centered', name='unnamedLabel'):
+		self.name = name
 		self.text = text
 		self.position = position
 		self.size = size
@@ -37,7 +41,8 @@ class Label(Entry):
 
 
 class Button(Entry):
-	def __init__(self, text, position, width, myfont):
+	def __init__(self, text, position, width, myfont, name='unnamedButton'):
+		self.name = name
 		self.text = text
 		self.position = position
 		self.width = width
@@ -67,14 +72,15 @@ class Button(Entry):
 
 
 class InputField(Label, Button):
-	def __init__(self, position, height, myfont, side='centered', text='InputField'):
+	def __init__(self, position, height, myfont, side='centered', text='InputField', name='unnamedInputField'):
+		self.name = name
 		self.initialPosition = position
 		self.initialHeight = height
 		self.myfont = myfont
 		self.side = side
 		self.text = text
 		#Label.__init__(self, self.text, position, height, myfont, side)
-		Label.__init__(self, self.text, Vec2d(self.initialPosition), self.initialHeight, self.myfont, self.side)
+		Label.__init__(self, self.text, Vec2d(self.initialPosition), self.initialHeight, self.myfont, self.side, name=self.name)
 		self.highlighted = False
 
 		#ButtonInit
@@ -95,7 +101,7 @@ class InputField(Label, Button):
 			else:
 				newText = self.text + event.unicode
 			self.text = newText
-			Label.__init__(self, self.text, Vec2d(self.initialPosition), self.initialHeight, self.myfont, self.side)
+			Label.__init__(self, self.text, Vec2d(self.initialPosition), self.initialHeight, self.myfont, self.side, name=self.name)
 
 	def draw(self):
 		color = red if self.highlighted else blue
@@ -199,7 +205,7 @@ class Menu(object):
 				self.scrollButtons()
 				return False
 		if result:
-			self.callback(result.text)
+			self.callCallback(result)
 
 	def addEntry(self, entry):
 		self.entrys.append(entry)
@@ -207,6 +213,10 @@ class Menu(object):
 	def onKey(self, ev):
 		for e in self.entrys:
 			e.onKey(ev)
+
+	def callCallback(self, entryPressed):
+		d = {'pressed': entryPressed, 'text': entryPressed.text, 'meta': {e.name: e for e in self.entrys}}
+		self.callback(d)
 
 
 from mainloop import init, mainloop, StdMain
