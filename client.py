@@ -20,7 +20,6 @@ class Client(threading.Thread):
 		self.queue = clientQueue
 		self.setDaemon(True)
 
-
 	def run(self):
 		self.recvLoop()
 

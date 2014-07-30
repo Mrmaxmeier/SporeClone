@@ -1,4 +1,4 @@
-#import socket
+import socket
 
 END = "\x00"
 
@@ -22,7 +22,7 @@ class SuperSocket:
 
 	def recv(self, chsize=1024):
 		try:
-			while not END in self.inBuf:
+			while not END in self.inBuf and self.isAlive:
 				recvd = self.sock.recv(chsize)
 				recvd = recvd.decode('UTF-8')
 				#print('chunk:', recvd)
@@ -41,4 +41,6 @@ class SuperSocket:
 		return msg
 
 	def close(self):
+		self.isAlive = False
+		self.sock.shutdown(socket.SHUT_RDWR)
 		self.sock.close()
