@@ -29,9 +29,16 @@ class SuperSocket:
 				if not recvd:
 					raise Exception()
 				self.inBuf += recvd
+		except OSError:
+			print('Connection Closed')
+			return None
 		except Exception as e:
+			print(type(e))
 			print('recv', str(e))
 			self.isAlive = False
 			return None
 		msg, _, self.inBuf = self.inBuf.partition("\0")
 		return msg
+
+	def close(self):
+		self.sock.close()

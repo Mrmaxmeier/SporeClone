@@ -316,5 +316,6 @@ class CreatureCreator(StdMain):
 
 
 creatureCreatorObj = mainloop((WINDOWSIZE, TITLE, FPS), CreatureCreator, draw.white)
-creatureCreatorObj.clientThread.sockAlive = False
-creatureCreatorObj.clientThread.close()
+if creatureCreatorObj.clientConnected:
+	creatureCreatorObj.clientThread.sockAlive = False
+	creatureCreatorObj.clientThread.close()

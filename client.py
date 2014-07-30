@@ -48,7 +48,7 @@ class Client(threading.Thread):
 				self.queue.put(data)
 
 	def close(self):
-		self.sock.close()
+		self.supersock.close()
 		self.sockAlive = False
 
 if __name__ == "__main__":
