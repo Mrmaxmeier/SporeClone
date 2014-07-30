@@ -9,6 +9,7 @@ from player import ArtificialPlayer, NetworkPlayer
 
 import socketserver
 import json
+import supersocket
 
 
 sampleMsg = {'joined': {'desc': 'Is called on Connection', 'name': 'Mrmaxmeier', 'body': {'desc': 'BodyDict from data/creatures'}},
@@ -36,17 +37,21 @@ class ServerHandler(socketserver.BaseRequestHandler):
 	def handle(self):
 		try:
 			while 1:
-				bdata = self.request.recv(1024 * 10)
-				if bdata == b'':
+				supersock = supersocket.SuperSocket(self.request)
+				bdata = supersock.recv()
+				if not bdata:
+					#if bdata == b'':
 					print('Connection Closed!')
 					return
-				data = json.loads(bdata.decode('UTF-8').strip())
+				#print('RAW', bdata)
+				data = json.loads(bdata)
 				# process the data, i.e. print it:
 				print("Recv'ed", data)
 				response = self.handleData(data)
 				# send some 'ok' back
-				respBytes = bytes(json.dumps(response), 'UTF-8')
-				self.request.sendall(respBytes)
+				resp = json.dumps(response)
+				#respBytes = bytes(resp, 'UTF-8')
+				supersock.send(resp)
 		except Exception as e:
 			print("Exception wile receiving message: ", e)
 

@@ -4,6 +4,8 @@ from world import World
 import threading
 import queue
 
+import supersocket
+
 NAME = 'me'
 d = {'joined': {'desc': 'Is called on Connection', 'name': NAME, 'body': {'desc': 'BodyDict from data/creatures'}}}
 
@@ -13,6 +15,7 @@ class Client(threading.Thread):
 		threading.Thread.__init__(self)
 		self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 		self.sock.connect((ip, 13373))
+		self.supersock = supersocket.SuperSocket(self.sock)
 		self.sockAlive = True
 		self.queue = clientQueue
 
@@ -20,17 +23,21 @@ class Client(threading.Thread):
 		self.recvLoop()
 
 	def send(self, d):
-		self.sock.send(bytes(json.dumps(d), 'UTF-8'))
+		self.supersock.send(json.dumps(d))
 
-	def recv(self, size=1024 * 10):
+	def recv(self):
 		try:
-			data = self.sock.recv(size)
-			if data == b'':
+			print("recv'in")
+			data = self.supersock.recv()
+			print('RAW', data)
+			if not data:
+				#if data == b'':
+				print('Socket Closed :(')
 				self.sockAlive = False
 				return {'connectionStatus': 'closed'}
-			decoded = data.decode('UTF-8')
-			print(decoded)
-			return json.loads(decoded)
+			#decoded = data.decode('UTF-8')
+			#print(decoded)
+			return json.loads(data)
 		except Exception as e:
 			return {'return': {'type': 'Malformed Data', 'exception': str(e)}}
 
@@ -51,4 +58,4 @@ if __name__ == "__main__":
 	clientThread.recvLoop(queue)
 	clientThread.close()
 	while clientThread.isAlive:
-		time.sleep(5)
+		time.sleep(2)
