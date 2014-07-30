@@ -27,11 +27,14 @@ STARTUP_CREATURE = """{"name":"New Creature","structure":{"name":"Base","sizeMod
 
 #
 
+from settings import Settings
 
+settingsObj = Settings()
 TITLE = 'CreatureCreator'
-FPS = 60
-WINDOWSIZE = Vec2d(1920, 1080) * 0.8
-WINDOWSIZE = Vec2d(int(WINDOWSIZE[0]), int(WINDOWSIZE[1]))
+FPS = settingsObj.get('FPS_Lock')
+WINDOWSIZE = Vec2d(settingsObj.get('screensize'))
+PLAYERNAME = settingsObj.get('name')
+CONNECTTOIP = settingsObj.get('ip')
 
 
 class PartSelector(object):
@@ -127,12 +130,14 @@ class CreatureCreator(StdMain):
 			self.connectToServer(ip, playername)
 
 		self.menu = menu.Menu(WINDOWSIZE, menuCallback, buttons=['-<Connect>-'], title='Connect to IP...?')
-		inputfield = menu.InputField(self.menu.middle + Vec2d(0, 80), 10, self.menu.myfont, name='playername', text='Your Name Here')
+		inputfield = menu.InputField(self.menu.middle + Vec2d(0, 80), 10, self.menu.myfont, name='playername', text=PLAYERNAME)
 		self.menu.addEntry(inputfield)
-		inputfield = menu.InputField(self.menu.middle + Vec2d(0, 160), 10, self.menu.myfont, name='ip', text='localhost')
+		inputfield = menu.InputField(self.menu.middle + Vec2d(0, 160), 10, self.menu.myfont, name='ip', text=CONNECTTOIP)
 		self.menu.addEntry(inputfield)
 
 	def connectToServer(self, ip, playername):
+		settingsObj.set('ip', ip)
+		settingsObj.set('name', playername)
 		print('connecting')
 		self.clientQueue = queue.Queue()
 		self.clientThread = client.Client(self.clientQueue, ip)

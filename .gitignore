@@ -6,3 +6,4 @@
 *.app
 *.dmg
 *.pyc
+settings.json
