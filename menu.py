@@ -95,8 +95,9 @@ class InputField(Label, Button):
 
 	def onKey(self, event):
 		if self.highlighted:
-			#print(event.unicode)
-			if event.unicode == '\x7f':
+			print(event)
+			#7f = DelMac, 08 = DelWin
+			if event.unicode == '\x7f' or event.unicode == '\x08':
 				newText = self.text[:-1]
 			else:
 				newText = self.text + event.unicode
