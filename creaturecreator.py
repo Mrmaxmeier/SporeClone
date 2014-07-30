@@ -120,16 +120,19 @@ class CreatureCreator(StdMain):
 		def menuCallback(result):
 			assert result['text'] == '-<Connect>-', 'onlybutton is connect, '+str(result)
 			assert 'ip' in result['meta'], 'Wrong dict in result: '+str(result)
+			assert 'playername' in result['meta'], 'Wrong dict in result: '+str(result)
 			ip = result['meta']['ip'].text
+			playername = result['meta']['playername'].text
 			self.menu = False
-			self.connectToServer(ip)
+			self.connectToServer(ip, playername)
 
 		self.menu = menu.Menu(WINDOWSIZE, menuCallback, buttons=['-<Connect>-'], title='Connect to IP...?')
-
+		inputfield = menu.InputField(self.menu.middle + Vec2d(0, 80), 10, self.menu.myfont, name='playername', text='Your Name Here')
+		self.menu.addEntry(inputfield)
 		inputfield = menu.InputField(self.menu.middle + Vec2d(0, 160), 10, self.menu.myfont, name='ip', text='localhost')
 		self.menu.addEntry(inputfield)
 
-	def connectToServer(self, ip):
+	def connectToServer(self, ip, playername):
 		print('connecting')
 		self.clientQueue = queue.Queue()
 		self.clientThread = client.Client(self.clientQueue, ip)
@@ -137,7 +140,7 @@ class CreatureCreator(StdMain):
 		self.clientConnected = True
 		self.clientThread.start()
 		print('listening')
-		self.clientThread.send({'join': 'MYNAMEIScreaturecreator'})
+		self.clientThread.send({'join': playername})
 		print('sent joinMsg')
 
 	def setActiveCreature(self, arg):
@@ -145,6 +148,9 @@ class CreatureCreator(StdMain):
 		if isinstance(arg, int):
 			crea = avalible[arg]
 		elif isinstance(arg, str):
+			crea = arg
+		else:
+			print(arg, type(arg))
 			crea = arg
 
 		assert self.creatureManager.setActiveCreature(crea) is True, 'No Creature loaded'
@@ -186,10 +192,11 @@ class CreatureCreator(StdMain):
 		elif ev.unicode == 'o':
 			def menuCallback(result):
 				print(result)
-				if result == 'Cancel':
+				text = result['text']
+				if text == 'Cancel':
 					self.menu = False
 					return
-				self.setActiveCreature(result)
+				self.setActiveCreature(text)
 				self.menu = False
 			b = ['Cancel']+self.creatureManager.getAvalibleCreatures()
 			self.menu = menu.Menu(WINDOWSIZE, menuCallback, buttons=b, title='Open...?', buttonScroll=True)
