@@ -10,7 +10,7 @@ print()
 
 # Dependencies are automatically detected, but it might need
 # fine tuning.
-buildOptions = dict(packages=["OpenGL", "tkinter", "tkinter.filedialog"],
+buildOptions = dict(packages=["OpenGL"],
 					include_files=['data/'],
 					excludes=[]#Icon Crashes on Windows Build#icon="icon.png"
 					)
