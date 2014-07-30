@@ -73,12 +73,14 @@ class InputField(Label, Button):
 		self.myfont = myfont
 		self.side = side
 		self.text = text
-		Label.__init__(self, self.text, position, height, myfont, side)
+		#Label.__init__(self, self.text, position, height, myfont, side)
+		Label.__init__(self, self.text, Vec2d(self.initialPosition), self.initialHeight, self.myfont, self.side)
 		self.highlighted = False
 
 		#ButtonInit
 
-		width = height * (len(text) * 1.0)
+		width = height * len(text) / 1
+		height *= 2
 		p1 = position + Vec2d(-width, height)
 		p2 = position + Vec2d(width, height)
 		p3 = position + Vec2d(width, -height)
@@ -87,7 +89,7 @@ class InputField(Label, Button):
 
 	def onKey(self, event):
 		if self.highlighted:
-			print(event.unicode)
+			#print(event.unicode)
 			if event.unicode == '\x7f':
 				newText = self.text[:-1]
 			else:
@@ -106,7 +108,7 @@ class InputField(Label, Button):
 		if click:
 			return False
 		else:
-			Button.collides(self, point, click)
+			return Button.collides(self, point, click)
 
 
 class Menu(object):
@@ -217,6 +219,8 @@ class MenuMain(StdMain):
 			self.cb(result)
 		self.m = Menu(WINDOWSIZE, callback)
 		inputfield = InputField(self.m.middle + Vec2d(0, 80), 10, self.m.myfont)
+		self.m.addEntry(inputfield)
+		inputfield = InputField(self.m.middle + Vec2d(0, 160), 10, self.m.myfont)
 		self.m.addEntry(inputfield)
 		for b in self.m.buttons:
 			print(b.text)
