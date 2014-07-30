@@ -322,6 +322,7 @@ class CreatureCreator(StdMain):
 			while True:
 				if self.clientThread.is_alive():
 					print('Thread still alive!')
+					self.clientThread.join()
 				else:
 					break
 		print('Should be dead now!')
