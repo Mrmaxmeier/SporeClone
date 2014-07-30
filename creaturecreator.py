@@ -111,14 +111,34 @@ class CreatureCreator(StdMain):
 
 		#
 
-		self.menu = False
+		#
+
+		self.clientConnected = False
 
 		#
 
+		def menuCallback(result):
+			assert result['text'] == '-<Connect>-', 'onlybutton is connect, '+str(result)
+			assert 'ip' in result['meta'], 'Wrong dict in result: '+str(result)
+			ip = result['meta']['ip'].text
+			self.menu = False
+			self.connectToServer(ip)
+
+		self.menu = menu.Menu(WINDOWSIZE, menuCallback, buttons=['-<Connect>-'], title='Connect to IP...?')
+
+		inputfield = menu.InputField(self.menu.middle + Vec2d(0, 160), 10, self.menu.myfont, name='ip', text='localhost')
+		self.menu.addEntry(inputfield)
+
+	def connectToServer(self, ip):
+		print('connecting')
 		self.clientQueue = queue.Queue()
-		self.clientThread = client.Client(self.clientQueue)
+		self.clientThread = client.Client(self.clientQueue, ip)
+		print('connected')
+		self.clientConnected = True
 		self.clientThread.start()
-		self.clientThread.send({'joined': 'creaturecreator'})
+		print('listening')
+		self.clientThread.send({'join': 'MYNAMEIScreaturecreator'})
+		print('sent joinMsg')
 
 	def setActiveCreature(self, arg):
 		avalible = self.creatureManager.getAvalibleCreatures()
@@ -143,6 +163,15 @@ class CreatureCreator(StdMain):
 		self.activeAllHinges = activeCreature.baseHinge.getPart().getAllSubHinges(WINDOWSIZE/2, activeCreature.size)
 
 	def onKey(self, ev):
+
+		if self.menu:
+			self.menu.onKey(ev)
+			return
+
+		#
+
+		#
+
 		if ev.unicode == 'r':
 			print()
 			print()
@@ -184,7 +213,7 @@ class CreatureCreator(StdMain):
 	def update(self, dt):
 		self.eventHandler.update(dt)
 		self.fps_display.change_text(str(int(self.clock.get_fps())) + " fps")
-		while True:
+		while self.clientConnected:
 			try:
 				d = self.clientQueue.get_nowait()
 				self.handleServerData(d)
