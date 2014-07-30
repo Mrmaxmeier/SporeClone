@@ -314,8 +314,12 @@ class CreatureCreator(StdMain):
 				creatureJson = json.dumps(creatureDict)
 				self.creatureManager.loadJson(creatureJson)
 
+	def exit(self):
+		print('Recieved EXIT Event')
+		if self.clientConnected:
+			self.clientThread.sockAlive = False
+			self.clientThread.close()
+		print('Should be dead now!')
+
 
 creatureCreatorObj = mainloop((WINDOWSIZE, TITLE, FPS), CreatureCreator, draw.white)
-if creatureCreatorObj.clientConnected:
-	creatureCreatorObj.clientThread.sockAlive = False
-	creatureCreatorObj.clientThread.close()

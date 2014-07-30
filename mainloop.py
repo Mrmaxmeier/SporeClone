@@ -32,6 +32,9 @@ class StdMain:
 	def draw(self):
 		pass
 
+	def exit(self):
+		pass
+
 
 def init(size, title):
 	(x, y) = size
@@ -67,6 +70,7 @@ def mainloop(options, Class, color=(0, 0, 0)):
 		obj.update(clock.get_time() / 1000.)
 		for event in pygame.event.get():
 			if event.type == QUIT:
+				obj.exit()
 				return obj
 			elif event.type == MOUSEBUTTONDOWN:
 				obj.onClick(event)
