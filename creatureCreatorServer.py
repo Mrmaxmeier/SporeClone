@@ -50,5 +50,5 @@ class CreatureCreatorServerHandler(ServerHandler):
 			return self.handleData({'creature': {'request': 'ALL'}})
 		return {'error': 'Message Not Parsed'}
 
-server = TCPServer(('127.0.0.1', 13373), CreatureCreatorServerHandler)
+server = TCPServer(('0.0.0.0', 13373), CreatureCreatorServerHandler)
 server.serve_forever()
