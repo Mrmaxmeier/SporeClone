@@ -5,3 +5,4 @@
 *.app.zip
 *.app
 *.dmg
+*.pyc
