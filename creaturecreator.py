@@ -202,17 +202,18 @@ class CreatureCreator(StdMain):
 			self.menu = menu.Menu(WINDOWSIZE, menuCallback, buttons=b, title='Open...?', buttonScroll=True)
 		elif ev.unicode == 'm':
 			def menuCallback(result):
-				if result == 'Cancel':
+				text = result['text']
+				if text == 'Cancel':
 					self.menu = False
 					return
-				elif result == 'Fetch Creatures':
+				elif text == 'Fetch Creatures':
 					self.clientThread.send({'creature': {'request': 'ALL'}})
-				elif result == 'Share current Creature':
+				elif text == 'Share current Creature':
 					activeCreature = self.creatureManager.activeCreature
 					json = activeCreature.getJson()
 					self.clientThread.send({'creature': {'add': json}})
 				else:
-					print(result)
+					print(text)
 				self.menu = False
 			b = ['Cancel', 'Fetch Creatures', 'Share current Creature']
 			self.menu = menu.Menu(WINDOWSIZE, menuCallback, buttons=b, title='Actions?')
