@@ -12,8 +12,7 @@ print()
 # fine tuning.
 buildOptions = dict(packages=["OpenGL", "tkinter", "tkinter.filedialog"],
 					include_files=['data/'],
-					excludes=[],
-					icon="icon.png"
+					excludes=[]#Icon Crashes on Windows Build#icon="icon.png"
 					)
 
 base = None
