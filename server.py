@@ -64,6 +64,12 @@ class SimpleServer(threading.Thread):
 			print(name, 'not in name2queue')
 			return False
 
+	def sendToAllBut(self, names, msg, sendDirect=True):
+		sendTo = self.name2thread.keys()
+		for n in sendTo:
+			if n not in names:
+				self.sendToName(n, msg, sendDirect)
+
 	def sendToAll(self, msg):
 		for thread in self.connectedClients:
 			thread.sendQueue.put(msg)
