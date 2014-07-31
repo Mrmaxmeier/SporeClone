@@ -91,6 +91,8 @@ class PartSelector(object):
 class CreatureCreator(StdMain):
 
 	def __init__(self):
+		self.clientConnected = False
+
 		self.mousePos = Vec2d(0, 0)
 		#Font
 		self.myfont = pygame.font.SysFont("Courier New", 32, bold=True)
@@ -99,6 +101,7 @@ class CreatureCreator(StdMain):
 		#Parts
 		self.partManager = manager.PartManager()
 		self.creatureManager = manager.CreatureManager(self.partManager)
+		self.creatureManager.loadJson(STARTUP_CREATURE)
 		self.creatureManager.activeCreature = fileParser.loadCreature(STARTUP_CREATURE, self.partManager)()
 		self.creatureManager.activeCreature.size *= 20
 		self.creature_name.change_text(self.creatureManager.activeCreature.name)
@@ -117,6 +120,7 @@ class CreatureCreator(StdMain):
 		#
 
 		self.clientConnected = False
+		self.liveEdit = True
 
 		#
 
@@ -148,7 +152,7 @@ class CreatureCreator(StdMain):
 		self.clientThread.send({'join': playername})
 		print('sent joinMsg')
 
-	def setActiveCreature(self, arg):
+	def setActiveCreature(self, arg, ownEdit=False):
 		avalible = self.creatureManager.getAvalibleCreatures()
 		if isinstance(arg, int):
 			crea = avalible[arg]
@@ -162,16 +166,20 @@ class CreatureCreator(StdMain):
 		activeCreature = self.creatureManager.activeCreature
 		#print(self.creatureManager.activeCreature.size)
 		activeCreature.size *= 20
-		self.updateCreature()
+		self.updateCreature(ownEdit)
 		self.creature_name.change_text(activeCreature.name)
 
-	def updateCreature(self):
+	def updateCreature(self, ownEdit=False):
 		activeCreature = self.creatureManager.activeCreature
 		self.eventHandler = eventhandler.EventHandler()
 		subp = activeCreature.baseHinge.getPart().getAllSubParts(WINDOWSIZE/2, activeCreature.size)
 		for p, pos, size in subp:
 			self.eventHandler.registerDict(p.getHandles())
 		self.activeAllHinges = activeCreature.baseHinge.getPart().getAllSubHinges(WINDOWSIZE/2, activeCreature.size)
+		if self.clientConnected and ownEdit:
+			if self.liveEdit:
+				print('LiveEdit!')
+				self.clientThread.send({'creature': {'add': activeCreature.getJson()}})
 
 	def onKey(self, ev):
 
@@ -284,7 +292,7 @@ class CreatureCreator(StdMain):
 						h.getPart().hinge = h
 						self.mouseHinge.setPart(None)
 						print('Mouse -> Click')
-						self.updateCreature()
+						self.updateCreature(ownEdit=True)
 					else:
 						self.mouseHinge.setPart(copy.deepcopy(h.getPart()))
 						if key_mods & pygame.KMOD_LALT or key_mods & pygame.KMOD_RALT:
@@ -293,7 +301,7 @@ class CreatureCreator(StdMain):
 						else:
 							h.setPart(None)
 						print('Click -> Mouse')
-						self.updateCreature()
+						self.updateCreature(ownEdit=True)
 			self.partSelector.onClick(ev)
 		elif button == 3:
 			if self.mouseHinge.hasPart():
@@ -304,7 +312,7 @@ class CreatureCreator(StdMain):
 				if h.hasPart():
 					if h.collides(positionVec, pos, size*5):
 						h.getPart().setSize(h.getPart().size + sizeDirection, setOrigSize=True)
-						print('RESIZED')
+						#print('RESIZED')
 
 	def handleServerData(self, d):
 		print('ServerData', d)
@@ -313,6 +321,11 @@ class CreatureCreator(StdMain):
 			for creatureDict in creatureList:
 				creatureJson = json.dumps(creatureDict)
 				self.creatureManager.loadJson(creatureJson)
+			if self.liveEdit:
+				print(self.creatureManager.activeCreature.name)
+				print(self.creatureManager.getAvalibleCreatures())
+				self.setActiveCreature(self.creatureManager.activeCreature.name)
+				self.updateCreature()
 
 	def exit(self):
 		print('Recieved EXIT Event')
