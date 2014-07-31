@@ -1,4 +1,4 @@
-from server import TCPServer, ServerHandler
+from server import SimpleServer, ClientHandlerThread
 import json
 import os
 #
@@ -36,7 +36,7 @@ class CreatureCreatorServerManager():
 serverManagerObj = CreatureCreatorServerManager()
 
 
-class CreatureCreatorServerHandler(ServerHandler):
+class CreatureCreatorServerHandler(ClientHandlerThread):
 	def handleData(self, d):
 		if 'creature' in d:
 			if 'request' in d['creature']:
@@ -45,10 +45,12 @@ class CreatureCreatorServerHandler(ServerHandler):
 					return {'response': 'creatures', 'creatures': s}
 			if 'add' in d['creature']:
 				serverManagerObj.addCreature(d['creature']['add'])
-				return self.handleData({'creature': {'request': 'ALL'}})
+				msg = {'response': 'creatures', 'creatures': [json.loads(d['creature']['add'])]}
+				self.server.sendToAll(json.dumps(msg))
+				return self.handleData({'response': 'Creature Updated 2 everyone'})
 		if 'join' in d:
 			return self.handleData({'creature': {'request': 'ALL'}})
 		return {'error': 'Message Not Parsed'}
 
-server = TCPServer(('0.0.0.0', 13373), CreatureCreatorServerHandler)
-server.serve_forever()
+server = SimpleServer('0.0.0.0', 13373, CreatureCreatorServerHandler)
+server.serve()
