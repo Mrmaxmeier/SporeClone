@@ -3,3 +3,5 @@ echo "Removing Build Folder"
 rm -Rf build
 echo "Building BUNDLE & DISK IMAGE"
 python3 build.py bdist_mac --iconfile icon.icns bdist_dmg
+echo "Opening built App"
+open build/*.app
