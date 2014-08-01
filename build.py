@@ -30,7 +30,7 @@ executables = [Executable('creaturecreator.py', base=base)]
 options = dict(build_exe=buildOptions)
 
 setup(name='Sp0re',
-	version='0.1',
-	description='THE Spore CLONE!!!oneoneone',
+	version='0.2',
+	description='A Spore Clone',
 	options=options,
 	executables=executables)

@@ -239,6 +239,13 @@ class GeneratedPart(GenericPart):
 				if self.hinge:
 					pos.rotate(self.hinge.rotation)
 				pos += position
+
+				mod = self.structMod(d['name'] if 'name' in d else None, pos, size)
+				if mod:
+					p, s = mod
+					pos += p
+					size += s
+
 				color = d['color']
 				draw.point(pos, color, size * d['size'], alpha=255.0)
 			elif d['draw'] == 'rect':
@@ -260,6 +267,13 @@ class GeneratedPart(GenericPart):
 				if self.hinge:
 					pos.rotate(self.hinge.rotation)
 				pos += position
+
+				mod = self.structMod(d['name'] if 'name' in d else None, pos, size)
+				if mod:
+					p, s = mod
+					pos += p
+					size += s
+
 				color = d['color']
 				vertices = d['vertices']
 				r = d['radius']*size
@@ -287,6 +301,13 @@ class GeneratedPart(GenericPart):
 				if self.hinge:
 					pos.rotate(self.hinge.rotation)
 				pos += ownPosition
+
+				mod = self.structMod(d['name'] if 'name' in d else None, pos, ownSize)
+				if mod:
+					p, s = mod
+					pos += p
+					ownSize += s
+
 				s = d['size'] * ownSize
 				self.collisionPolys.append([pos-Vec2d(s, s), pos-Vec2d(s, -s), pos-Vec2d(-s, -s), pos-Vec2d(-s, s)])
 			elif d['draw'] == 'rect':
@@ -306,6 +327,13 @@ class GeneratedPart(GenericPart):
 				if self.hinge:
 					pos.rotate(self.hinge.rotation)
 				pos += ownPosition
+
+				mod = self.structMod(d['name'] if 'name' in d else None, pos, ownSize)
+				if mod:
+					p, s = mod
+					pos += p
+					ownSize += s
+
 				vertices = d['vertices']
 				r = d['radius']*ownSize
 				steps = int(360/vertices)
@@ -322,6 +350,9 @@ class GeneratedPart(GenericPart):
 		for poly in self.collisionPolys:
 			if collision.polyPointCollides(poly, collisionPoint):
 				return True
+		return False
+
+	def structMod(self, structName, pos, size):
 		return False
 
 
@@ -358,28 +389,28 @@ class Eye(GeneratedPart):
 		GeneratedPart.__init__(self, hinge)
 		self.mousePos = False
 
-	def draw(self, position, size):
-		for d in self.structure:
-			if d['draw'] == 'point':
-				pos = Vec2d(d['position'])*size + position
-				if 'name' in d:
-					if d['name'] == 'pupil':
-						v = self.mousePos-pos
-						if v.get_length() > 10:
-							v = v.normalized() * 10
-						pos += v
-					elif d['name'] == 'iris':
-						v = self.mousePos-pos
-						if v.get_length() > 20:
-							v = v.normalized() * 20
-						pos += v
-					elif d['name'] == 'subiris':
-						v = self.mousePos-pos
-						if v.get_length() > 30:
-							v = v.normalized() * 30
-						pos += v
-				color = d['color']
-				draw.point(pos, color, size * d['size'], alpha=255.0)
+	#def draw(self, position, size):
+	#	for d in self.structure:
+	#		if d['draw'] == 'point':
+	#			pos = Vec2d(d['position'])*size + position
+	#			if 'name' in d:
+	#				if d['name'] == 'pupil':
+	#					v = self.mousePos-pos
+	#					if v.get_length() > 10:
+	#						v = v.normalized() * 10
+	#					pos += v
+	#				elif d['name'] == 'iris':
+	#					v = self.mousePos-pos
+	#					if v.get_length() > 20:
+	#						v = v.normalized() * 20
+	#					pos += v
+	#				elif d['name'] == 'subiris':
+	#					v = self.mousePos-pos
+	#					if v.get_length() > 30:
+	#						v = v.normalized() * 30
+	#					pos += v
+	#			color = d['color']
+	#			draw.point(pos, color, size * d['size'], alpha=255.0)
 
 	def onMouse(self, position):
 		self.mousePos = position
@@ -387,14 +418,64 @@ class Eye(GeneratedPart):
 	def getHandles(self):
 		return {'mouseMovement': self.onMouse}
 
+	def structMod(self, structName, pos, size):
+		if structName == 'pupil':
+			v = self.mousePos-pos
+			if v.get_length() > 10:
+				v = v.normalized() * 10
+		elif structName == 'iris':
+			v = self.mousePos-pos
+			if v.get_length() > 20:
+				v = v.normalized() * 20
+		elif structName == 'subiris':
+			v = self.mousePos-pos
+			if v.get_length() > 30:
+				v = v.normalized() * 30
+		else:
+			return False
+		return v, 1
+
 
 class Paddle(GeneratedPart):
+	def __init__(self, hinge):
+		GeneratedPart.__init__(self, hinge)
+		self.sceneName = False
+		self.paddleEffect = 0
+		self.paddleSpeed = 0
+		self.time = 0.0
+		self.onSceneChange('CreatureCreator')
+
+	def update(self, dt):
+		self.time += dt
 
 	def onBodyMovement(self, mv):
 		raise NotImplementedError
 
+	def onSceneChange(self, sceneName):
+		self.sceneName = sceneName
+		if sceneName == 'CreatureCreator':
+			self.paddleEffect = 0.1
+			self.paddleSpeed = 4.5
+		else:
+			self.paddleEffect = 0
+			self.paddleSpeed = 0
+
 	def getHandles(self):
-		return {'bodyMovement': self.onBodyMovement}
+		return {'bodyMovement': self.onBodyMovement, 'update': self.update}
+
+	def paddleMod(self, segNum):
+		mod = math.sin((self.paddleSpeed * self.time) + (segNum*0.5))
+		mod *= (self.paddleEffect * segNum)
+		return mod
+
+	def structMod(self, structName, pos, size):
+		if 'seg' in structName:
+			segNum = int(structName[-1])
+			mod = self.paddleMod(segNum)
+			relpos = Vec2d(mod, 0).rotated(self.hinge.rotation) * size
+			print(segNum, mod, relpos)
+			return relpos, 1
+		return False
 
 
 CLASSNAME2CLASS = {'Base': Base, 'Mouth': Mouth, 'Eye': Eye, 'Paddle': Paddle}
