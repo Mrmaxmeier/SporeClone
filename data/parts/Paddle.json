@@ -45,7 +45,7 @@
          ]
       },
       {  
-         "name":"seg3",
+         "name":"seg4",
          "draw":"point",
          "size":2,
          "color":[  
@@ -59,7 +59,7 @@
          ]
       },
       {  
-         "name":"seg3",
+         "name":"seg5",
          "draw":"point",
          "size":1,
          "color":[  
