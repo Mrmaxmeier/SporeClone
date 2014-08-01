@@ -23,3 +23,6 @@ class EventHandler(object):
 	def registerDict(self, d):
 		for key in d:
 			self.register(key, d[key])
+
+	def sceneChange(self, sceneName):
+		self.callhandlers('sceneChange', sceneName)
