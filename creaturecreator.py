@@ -123,6 +123,13 @@ class CreatureCreator(StdMain):
 		self.liveEdit = True
 
 		#
+		def getConnectMenu(msg='Connect to IP...?'):
+			m = menu.Menu(WINDOWSIZE, menuCallback, buttons=['-<Connect>-'], title=msg)
+			inputfield = menu.InputField(m.middle + Vec2d(0, 80), 10, m.myfont, name='playername', text=PLAYERNAME)
+			m.addEntry(inputfield)
+			inputfield = menu.InputField(m.middle + Vec2d(0, 160), 10, m.myfont, name='ip', text=CONNECTTOIP)
+			m.addEntry(inputfield)
+			return m
 
 		def menuCallback(result):
 			assert result['text'] == '-<Connect>-', 'onlybutton is connect, '+str(result)
@@ -131,26 +138,36 @@ class CreatureCreator(StdMain):
 			ip = result['meta']['ip'].text
 			playername = result['meta']['playername'].text
 			self.menu = False
-			self.connectToServer(ip, playername)
+			if not self.connectToServer(ip, playername):
+				print('Server not avalible!')
+				self.menu = getConnectMenu('Server not avalible!')
 
-		self.menu = menu.Menu(WINDOWSIZE, menuCallback, buttons=['-<Connect>-'], title='Connect to IP...?')
-		inputfield = menu.InputField(self.menu.middle + Vec2d(0, 80), 10, self.menu.myfont, name='playername', text=PLAYERNAME)
-		self.menu.addEntry(inputfield)
-		inputfield = menu.InputField(self.menu.middle + Vec2d(0, 160), 10, self.menu.myfont, name='ip', text=CONNECTTOIP)
-		self.menu.addEntry(inputfield)
+		self.menu = getConnectMenu()
 
 	def connectToServer(self, ip, playername):
 		settingsObj.set('ip', ip)
 		settingsObj.set('name', playername)
 		print('connecting')
 		self.clientQueue = queue.Queue()
-		self.clientThread = client.Client(self.clientQueue, ip)
+		try:
+			self.clientThread = client.Client(self.clientQueue, ip)
+		except OSError as e:
+			print(e)
+			print(e.strerror)
+			if e.errno == 61:
+				#ConnectionError
+				return False
+			else:
+				raise e
+			print(e.filename)
+			print(e.strerror)
 		print('connected')
 		self.clientConnected = True
 		self.clientThread.start()
 		print('listening')
 		self.clientThread.send({'join': playername})
 		print('sent joinMsg')
+		return True
 
 	def setActiveCreature(self, arg, ownEdit=False):
 		avalible = self.creatureManager.getAvalibleCreatures()
