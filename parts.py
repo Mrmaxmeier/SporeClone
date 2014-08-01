@@ -240,7 +240,7 @@ class GeneratedPart(GenericPart):
 					pos.rotate(self.hinge.rotation)
 				pos += position
 
-				mod = self.structMod(d['name'] if 'name' in d else None, pos, size)
+				mod = self.structMod(d, pos, size)
 				if mod:
 					p, s = mod
 					pos += p
@@ -268,7 +268,7 @@ class GeneratedPart(GenericPart):
 					pos.rotate(self.hinge.rotation)
 				pos += position
 
-				mod = self.structMod(d['name'] if 'name' in d else None, pos, size)
+				mod = self.structMod(d, pos, size)
 				if mod:
 					p, s = mod
 					pos += p
@@ -302,7 +302,7 @@ class GeneratedPart(GenericPart):
 					pos.rotate(self.hinge.rotation)
 				pos += ownPosition
 
-				mod = self.structMod(d['name'] if 'name' in d else None, pos, ownSize)
+				mod = self.structMod(d, pos, ownSize)
 				if mod:
 					p, s = mod
 					pos += p
@@ -328,7 +328,7 @@ class GeneratedPart(GenericPart):
 					pos.rotate(self.hinge.rotation)
 				pos += ownPosition
 
-				mod = self.structMod(d['name'] if 'name' in d else None, pos, ownSize)
+				mod = self.structMod(d, pos, ownSize)
 				if mod:
 					p, s = mod
 					pos += p
@@ -352,7 +352,8 @@ class GeneratedPart(GenericPart):
 				return True
 		return False
 
-	def structMod(self, structName, pos, size):
+	def structMod(self, structDict, pos, size):
+		#structName = structDict['name'] if 'name' in structDict else None
 		return False
 
 
@@ -389,36 +390,14 @@ class Eye(GeneratedPart):
 		GeneratedPart.__init__(self, hinge)
 		self.mousePos = False
 
-	#def draw(self, position, size):
-	#	for d in self.structure:
-	#		if d['draw'] == 'point':
-	#			pos = Vec2d(d['position'])*size + position
-	#			if 'name' in d:
-	#				if d['name'] == 'pupil':
-	#					v = self.mousePos-pos
-	#					if v.get_length() > 10:
-	#						v = v.normalized() * 10
-	#					pos += v
-	#				elif d['name'] == 'iris':
-	#					v = self.mousePos-pos
-	#					if v.get_length() > 20:
-	#						v = v.normalized() * 20
-	#					pos += v
-	#				elif d['name'] == 'subiris':
-	#					v = self.mousePos-pos
-	#					if v.get_length() > 30:
-	#						v = v.normalized() * 30
-	#					pos += v
-	#			color = d['color']
-	#			draw.point(pos, color, size * d['size'], alpha=255.0)
-
 	def onMouse(self, position):
 		self.mousePos = position
 
 	def getHandles(self):
 		return {'mouseMovement': self.onMouse}
 
-	def structMod(self, structName, pos, size):
+	def structMod(self, structDict, pos, size):
+		structName = structDict['name'] if 'name' in structDict else None
 		if structName == 'pupil':
 			v = self.mousePos-pos
 			if v.get_length() > 10:
@@ -454,8 +433,8 @@ class Paddle(GeneratedPart):
 	def onSceneChange(self, sceneName):
 		self.sceneName = sceneName
 		if sceneName == 'CreatureCreator':
-			self.paddleEffect = 0.1
-			self.paddleSpeed = 4.5
+			self.paddleEffect = 0.5
+			self.paddleSpeed = 2.25
 		else:
 			self.paddleEffect = 0
 			self.paddleSpeed = 0
@@ -463,17 +442,20 @@ class Paddle(GeneratedPart):
 	def getHandles(self):
 		return {'bodyMovement': self.onBodyMovement, 'update': self.update}
 
-	def paddleMod(self, segNum):
-		mod = math.sin((self.paddleSpeed * self.time) + (segNum*0.5))
-		mod *= (self.paddleEffect * segNum)
+	def paddleMod(self, segNum, modifier):
+		phaseshift = (segNum/7.0) * math.pi * 2.0
+		mod = math.sin((self.paddleSpeed * self.time) + phaseshift)
+		mod *= self.paddleEffect
+		mod *= modifier
 		return mod
 
-	def structMod(self, structName, pos, size):
+	def structMod(self, structDict, pos, size):
+		structName = structDict['name'] if 'name' in structDict else None
 		if 'seg' in structName:
 			segNum = int(structName[-1])
-			mod = self.paddleMod(segNum)
+			segModifier = structDict['modifier']
+			mod = self.paddleMod(segNum, segModifier)
 			relpos = Vec2d(mod, 0).rotated(self.hinge.rotation) * size
-			print(segNum, mod, relpos)
 			return relpos, 1
 		return False
 

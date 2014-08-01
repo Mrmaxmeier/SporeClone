@@ -3,9 +3,10 @@
    "partClass":"Paddle",
    "structure":[  
       {  
-         "name":"seg1",
+         "name":"seg0",
+         "modifier": 0,
          "draw":"point",
-         "size":5,
+         "size":3,
          "color":[  
             0.9,
             0.9,
@@ -17,13 +18,29 @@
          ]
       },
       {  
-         "name":"seg2",
+         "name":"seg1",
+         "modifier": 0.35,
          "draw":"point",
-         "size":4,
+         "size":2.6,
          "color":[  
             0.8,
             0.8,
             0.8
+         ],
+         "position":[  
+            0,
+            0.4
+         ]
+      },
+      {  
+         "name":"seg2",
+         "modifier": 0.5,
+         "draw":"point",
+         "size":2.5,
+         "color":[  
+            0.7,
+            0.7,
+            0.7
          ],
          "position":[  
             0,
@@ -32,22 +49,9 @@
       },
       {  
          "name":"seg3",
+         "modifier": 0.61,
          "draw":"point",
-         "size":3,
-         "color":[  
-            0.7,
-            0.7,
-            0.7
-         ],
-         "position":[  
-            0,
-            2
-         ]
-      },
-      {  
-         "name":"seg4",
-         "draw":"point",
-         "size":2,
+         "size":1.95,
          "color":[  
             0.6,
             0.6,
@@ -55,13 +59,14 @@
          ],
          "position":[  
             0,
-            3
+            1.44
          ]
       },
       {  
-         "name":"seg5",
+         "name":"seg4",
+         "modifier": 0.7,
          "draw":"point",
-         "size":1,
+         "size":1.5,
          "color":[  
             0.5,
             0.5,
@@ -69,7 +74,37 @@
          ],
          "position":[  
             0,
-            3.5
+            1.8
+         ]
+      },
+      {  
+         "name":"seg5",
+         "modifier": 0.79,
+         "draw":"point",
+         "size":1.05,
+         "color":[  
+            0.4,
+            0.4,
+            0.4
+         ],
+         "position":[  
+            0,
+            2.16
+         ]
+      },
+      {  
+         "name":"seg6",
+         "modifier": 0.86,
+         "draw":"point",
+         "size":0.7,
+         "color":[  
+            0.3,
+            0.3,
+            0.3
+         ],
+         "position":[  
+            0,
+            2.44
          ]
       }
    ],
