@@ -141,8 +141,13 @@ class CreatureCreator(StdMain):
 			if not self.connectToServer(ip, playername):
 				print('Server not avalible!')
 				self.menu = getConnectMenu('Server not avalible!')
+				self.staticMenu.setLabel('Server not avalible!')
+			else:
+				self.staticMenu.setLabel('Conncted!')
 
 		self.menu = getConnectMenu()
+
+		self.staticMenu = menu.Menu(WINDOWSIZE - Vec2d(0, (WINDOWSIZE.y * 0.9)), menuCallback, buttons=[], title='<-Status->')
 
 	def connectToServer(self, ip, playername):
 		settingsObj.set('ip', ip)
@@ -263,6 +268,7 @@ class CreatureCreator(StdMain):
 		pass
 
 	def draw(self):
+		self.staticMenu.draw()
 		if self.menu:
 			self.menu.draw()
 		else:
@@ -343,6 +349,10 @@ class CreatureCreator(StdMain):
 				print(self.creatureManager.getAvalibleCreatures())
 				self.setActiveCreature(self.creatureManager.activeCreature.name)
 				self.updateCreature()
+		if 'players' in d:
+			playerList = d['players']
+			playersStr = ", ".join([str(p) for p in playerList])
+			self.staticMenu.setLabel('Players: ' + playersStr)
 
 	def exit(self):
 		print('Recieved EXIT Event')

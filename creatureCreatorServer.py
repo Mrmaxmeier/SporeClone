@@ -53,6 +53,8 @@ class CreatureCreatorServerHandler(ClientHandlerThread):
 			print(self.address, 'now known as', self.playerName)
 			self.server.registerName(self.playerName, self)
 			print(self.playerName, 'registered in PlayerDict')
+			msg = json.dumps({'players': list(self.server.name2thread.keys())})
+			self.server.sendToAll(msg)
 			return self.handleData({'creature': {'request': 'ALL'}})
 		return {'error': 'Message Not Parsed'}
 
