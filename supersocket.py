@@ -16,7 +16,7 @@ class SuperSocket:
 			newmsg = msg + END
 			self.sock.send(bytes(newmsg, 'UTF-8'))
 		except Exception as e:
-			print(e)
+			print('Exception in supersock while sending:', e)
 			self.isAlive = False
 			return None
 
@@ -34,7 +34,7 @@ class SuperSocket:
 			return None
 		except Exception as e:
 			print(type(e))
-			print('recv', str(e))
+			print('exception while Recieving', str(e))
 			self.isAlive = False
 			return None
 		msg, _, self.inBuf = self.inBuf.partition("\0")

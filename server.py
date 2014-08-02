@@ -51,7 +51,7 @@ class SimpleServer(threading.Thread):
 			(clientsock, (ip, port)) = self.sock.accept()
 			print('New Connection @', ip, ':', port)
 			sendToClientQueue = queue.Queue()
-			newThread = self.newThreadHandler(clientsock, sendToClientQueue, self)
+			newThread = self.newThreadHandler(clientsock, (ip, port), sendToClientQueue, self)
 			self.connectedClients.append(newThread)
 
 	def sendToName(self, name, msg, sendDirect=True):
@@ -80,9 +80,10 @@ class SimpleServer(threading.Thread):
 
 
 class ClientHandlerThread(threading.Thread):
-	def __init__(self, clientsock, sendQueue, server):
+	def __init__(self, clientsock, address, sendQueue, server):
 		threading.Thread.__init__(self)
 		self.sock = clientsock
+		self.address = address
 		self.sendQueue = sendQueue
 		self.supersock = supersocket.SuperSocket(clientsock)
 		self.server = server
@@ -90,6 +91,7 @@ class ClientHandlerThread(threading.Thread):
 
 	def run(self):
 		print('Thread started')
+		print('ClientThread running @', self.address)
 		self.handle()
 
 	def handleData(self, d):
