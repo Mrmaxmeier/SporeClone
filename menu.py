@@ -96,7 +96,7 @@ class InputField(Label, Button):
 	def onKey(self, event):
 		if self.highlighted:
 			print(event)
-			#7f = DelMac, 08 = DelWin
+			#7f = DelMac, 08 = DelWin & Linux
 			if event.unicode == '\x7f' or event.unicode == '\x08':
 				newText = self.text[:-1]
 			else:
@@ -119,7 +119,7 @@ class InputField(Label, Button):
 
 
 class Menu(object):
-	def __init__(self, screenSize, callback, buttons=['Cancel', 'Okee', 'OfCOOurs'], title='Wähle deine Antwort', buttonScroll=False):
+	def __init__(self, screenSize, callback, buttons=['Button', 'Button No. 2'], title='Title', buttonScroll=False):
 		self.screenSize = screenSize
 		self.middle = screenSize / 2
 		self.scale = screenSize / 6
@@ -137,12 +137,18 @@ class Menu(object):
 		else:
 			self.setButtons(buttons)
 
-		labelPos = self.middle - Vec2d(0, self.scale.y / 2.0)
-		textSize = charWidth
+		self.labelPos = self.middle - Vec2d(0, self.scale.y / 2.0)
+		self.textSize = charWidth
 		#textSize = (charWidth * len(title) * 0.5) / len(title) * 2.0
-		self.titleLabel = Label(title, labelPos, textSize, self.myfont, side='centered')
+		self.titleLabel = False
+		self.entrys = []
+		self.setLabel(title)
 
-		self.entrys = [self.titleLabel]
+	def setLabel(self, text):
+		if self.entrys and self.titleLabel:
+			self.entrys.remove(self.titleLabel)
+		self.titleLabel = Label(text, Vec2d(self.labelPos), self.textSize, self.myfont, side='centered')
+		self.entrys.append(self.titleLabel)
 
 	def scrollButtons(self):
 		index = self.buttonScrollIndex
