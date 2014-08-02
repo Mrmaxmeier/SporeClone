@@ -119,8 +119,9 @@ class InputField(Label, Button):
 
 
 class Menu(object):
-	def __init__(self, screenSize, callback, buttons=['Button', 'Button No. 2'], title='Title', buttonScroll=False):
+	def __init__(self, screenSize, callback, buttons=['Button', 'Button No. 2'], title='Title', buttonScroll=False, horizontal=True):
 		self.screenSize = screenSize
+		self.buttonsHorizontal = horizontal
 		self.middle = screenSize / 2
 		self.scale = screenSize / 6
 
@@ -174,8 +175,11 @@ class Menu(object):
 			currLength += step
 			posx = self.middle.x + currLength
 			currLength += step
-			pos = Vec2d(posx, self.middle.y)
-			print('Position', pos)
+			if self.buttonsHorizontal:
+				pos = Vec2d(posx, self.middle.y)
+			else:
+				pos = Vec2d(self.middle.x, self.middle.y + i * (self.scale.y / (len(buttons) / 2.0)))
+			#print('Position', pos)
 			b = Button(text, pos, step * 0.9, self.myfont)
 			self.buttons.append(b)
 

@@ -234,7 +234,7 @@ class CreatureCreator(StdMain):
 				self.setActiveCreature(text)
 				self.menu = False
 			b = ['Cancel']+self.creatureManager.getAvalibleCreatures()
-			self.menu = menu.Menu(WINDOWSIZE, menuCallback, buttons=b, title='Open...?', buttonScroll=True)
+			self.menu = menu.Menu(WINDOWSIZE, menuCallback, buttons=b, title='Open...?', buttonScroll=True, horizontal=False)
 		elif ev.unicode == 'm':
 			def menuCallback(result):
 				text = result['text']
