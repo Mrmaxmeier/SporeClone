@@ -58,5 +58,14 @@ class CreatureCreatorServerHandler(ClientHandlerThread):
 			return self.handleData({'creature': {'request': 'ALL'}})
 		return {'error': 'Message Not Parsed'}
 
+	def onExit(self):
+		if self.playerName:
+			print('Deregistering name')
+			self.server.name2thread.pop(self.playerName)
+			print('sending new playerlist')
+			msg = json.dumps({'players': list(self.server.name2thread.keys())})
+			self.server.sendToAll(msg)
+			print('i be ded now', self.address)
+
 server = SimpleServer('0.0.0.0', 13373, CreatureCreatorServerHandler)
 server.serve()

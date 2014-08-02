@@ -104,6 +104,7 @@ class ClientHandlerThread(threading.Thread):
 				if not bdata:
 					#if bdata == b'':
 					print('Connection Closed!')
+					self.onExit()
 					return
 				#print('RAW', bdata)
 				data = json.loads(bdata)
@@ -116,6 +117,18 @@ class ClientHandlerThread(threading.Thread):
 				self.supersock.send(resp)
 
 				self.processQueue()
+		except OSError as e:
+			print(e)
+			print(e.strerror)
+			print(e.errno)
+			if e.errno == 61:
+				print('Connection Closed!')
+				self.onExit()
+				return False
+			else:
+				raise e
+			print(e.filename)
+			print(e.strerror)
 		except Exception as e:
 			print(type(e), "while receiving message: ", e)
 
@@ -128,6 +141,9 @@ class ClientHandlerThread(threading.Thread):
 				break
 			except Exception as e:
 				print(type(e), "while sending queued message: ", e)
+
+	def onExit(self):
+		print('i be ded', self.address)
 
 
 if __name__ == "__main__":
